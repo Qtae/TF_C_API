@@ -350,4 +350,4 @@ MigrationBackup/
 .ionide/
 
 #Tensorflow C API
-.tensorflow/
+tensorflow/
