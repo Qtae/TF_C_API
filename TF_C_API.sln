@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ADC", "ADC\ADC.vcxproj", "{9E6A7F2C-EA9D-4DAB-8960-2915953C3430}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TF_C_API", "TF_C_API\TF_C_API.vcxproj", "{9E6A7F2C-EA9D-4DAB-8960-2915953C3430}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,7 +9,6 @@ TFCore::TFCore()
 
 TFCore::~TFCore()
 {
-	FreeModel();
 }
 
 bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInputOpNames, std::vector<const char *> &vtOutputOpNames)
@@ -54,12 +53,12 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 		m_nInputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrInputOps[0], m_Status);
 		int64_t *InputShape = new int64_t[m_nInputDims[i]];
 		TF_GraphGetTensorShape(m_Graph, m_arrInputOps[0], InputShape, m_nInputDims[i], m_Status);
-		long long * InputDims = new long long[m_nInputDims[i]];
-		m_InputDims[i] = InputDims;
+		m_InputDims[i] = new long long[m_nInputDims[i]];
 		m_InputDims[i][0] = static_cast<long long>(1);
 		for (int j = 1; j < m_nInputDims[i]; ++j) m_InputDims[i][j] = static_cast<long long>(InputShape[j]);
 		m_InputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(m_arrInputOps[i]));
 		for (int j = 1; j < m_nInputDims[i]; ++j) m_InputDataSizePerBatch[i] = m_InputDataSizePerBatch[i] * static_cast<int>(InputShape[j]);
+		delete[] InputShape;
 	}
 
 	for (int i = 0; i < m_nOutputOps; ++i)
@@ -74,12 +73,12 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 		m_nOutputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrOutputOps[0], m_Status);
 		int64_t *OutputShape = new int64_t[m_nOutputDims[i]];
 		TF_GraphGetTensorShape(m_Graph, m_arrOutputOps[0], OutputShape, m_nOutputDims[i], m_Status);
-		long long * OutputDims = new long long[m_nOutputDims[i]];
-		m_OutputDims[i] = OutputDims;
+		m_OutputDims[i] = new long long[m_nOutputDims[i]];
 		m_OutputDims[i][0] = static_cast<long long>(1);
 		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDims[i][j] = static_cast<long long>(OutputShape[j]);
 		m_OutputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(m_arrOutputOps[0]));
 		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDataSizePerBatch[i] = m_OutputDataSizePerBatch[i] * static_cast<int>(OutputShape[j]);
+		delete[] OutputShape;
 	}
 
 	m_bModelLoaded = true;
@@ -134,6 +133,8 @@ bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
 													   Deallocator,
 													   nullptr);
 			arrInputTensors[opsIdx] = InputImageTensor;
+
+			delete[] ImageData;
 		}
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
@@ -149,13 +150,16 @@ bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
 					  m_arrOutputOps, arrOutputTensors, m_nOutputOps,
 					  nullptr, 0, nullptr, m_Status);
 
-		if (TF_GetCode(m_Status) != TF_OK)
+		//Input Tensor 메모리 해제
+		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 		{
-			//Input/Output Tensor 메모리 해제 추가
-			return false;
+			TF_DeleteTensor(arrInputTensors[opsIdx]);
 		}
 
-		//Input Tensor 및 Tensor 안의 Data 메모리 해제 추가
+		if (TF_GetCode(m_Status) != TF_OK)
+		{
+			return false;
+		}
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
@@ -225,13 +229,13 @@ bool TFCore::Run(float **ppImageSet, int nImage, int nBatch)
 			m_arrOutputOps, arrOutputTensors, m_nOutputOps,
 			nullptr, 0, nullptr, m_Status);
 
+		//Input Tensor 메모리 해제
+		TF_DeleteTensor(arrInputTensors[0]);
+
 		if (TF_GetCode(m_Status) != TF_OK)
 		{
-			//Input/Output Tensor 메모리 해제 추가
 			return false;
 		}
-
-		//Input Tensor 및 Tensor 안의 Data 메모리 해제 추가
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
@@ -241,16 +245,37 @@ bool TFCore::Run(float **ppImageSet, int nImage, int nBatch)
 
 bool TFCore::FreeModel()
 {
-	if (m_RunOptions != nullptr) TF_DeleteBuffer(m_RunOptions);
-	if (m_SessionOptions != nullptr) TF_DeleteSessionOptions(m_SessionOptions);
-	if (m_Session != nullptr) TF_DeleteSession(m_Session, m_Status);
-	if (m_Graph != nullptr) TF_DeleteGraph(m_Graph);
-	if (m_Status != nullptr) TF_DeleteStatus(m_Status);
-
 	m_bModelLoaded = false;
 	m_bDataLoaded = false;
 
-	//다른 동적배열도 메모리 해제 필요
+	for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
+		delete[] m_InputDims[opsIdx];
+	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+		delete[] m_OutputDims[opsIdx];
+	delete[] m_arrInputOps;
+	delete[] m_arrOutputOps;
+	delete[] m_nInputDims;
+	delete[] m_nOutputDims;
+	delete[] m_InputDataSizePerBatch;
+	delete[] m_OutputDataSizePerBatch;
+	delete[] m_InputDims;
+	delete[] m_OutputDims;
+
+	if (m_RunOptions != nullptr)
+		TF_DeleteBuffer(m_RunOptions);
+	if (m_MetaGraph != nullptr)
+		TF_DeleteBuffer(m_MetaGraph);
+	if (m_SessionOptions != nullptr)
+		TF_DeleteSessionOptions(m_SessionOptions);
+	if (m_Session != nullptr)
+	{
+		TF_CloseSession(m_Session, m_Status);
+		TF_DeleteSession(m_Session, m_Status);
+	}
+	if (m_Graph != nullptr)
+		TF_DeleteGraph(m_Graph);
+	if (m_Status != nullptr)
+		TF_DeleteStatus(m_Status);
 
 	return true;
 }
