@@ -6,8 +6,8 @@ namespace TFTool
 	class Classification : public TFCore
 	{
 	public:
-		Classification();
-		~Classification();
-		std::vector<std::vector<std::vector<float>>> GetResult();
+		__declspec(dllexport) Classification();
+		__declspec(dllexport) ~Classification();
+		__declspec(dllexport) std::vector<std::vector<std::vector<float>>> GetResult();
 	};
 }

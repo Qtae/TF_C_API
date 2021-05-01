@@ -6,14 +6,14 @@ namespace TFTool
 	class Detection : public TFCore
 	{
 	public:
-		Detection();
-		~Detection();
+		__declspec(dllexport) Detection();
+		__declspec(dllexport) ~Detection();
 	};
 
 	class Yolo : public TFCore
 	{
 	public:
-		Yolo();
-		~Yolo();
+		__declspec(dllexport) Yolo();
+		__declspec(dllexport) ~Yolo();
 	};
 }
