@@ -6,8 +6,14 @@ namespace TFTool
 	class Segmentation : public TFCore
 	{
 	public:
-		__declspec(dllexport) Segmentation();
-		__declspec(dllexport) ~Segmentation();
-		__declspec(dllexport) std::vector<std::vector<float *>> GetResult();
+		Segmentation();
+		~Segmentation();
+		std::vector<std::vector<float*>> GetOutput();
+
+	private:
+		bool FreeOutputMap();
+
+	private:
+		std::vector<std::vector<float*>> m_vtOutputRes;
 	};
 }

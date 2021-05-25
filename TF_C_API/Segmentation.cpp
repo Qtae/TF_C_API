@@ -10,9 +10,11 @@ namespace TFTool
 	{
 	}
 
-	std::vector<std::vector<float *>> Segmentation::GetResult()
+	std::vector<std::vector<float *>> Segmentation::GetOutput()
 	{
-		std::vector<std::vector<float *>> vtResult;
+		if (!m_vtOutputRes.empty())
+			FreeOutputMap();
+
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)//output operator °¹¼ö iteration
 		{
 			std::vector<float *> vtResultOp;
@@ -20,15 +22,33 @@ namespace TFTool
 			{
 				int nBatch = (int)TF_Dim(vtOutputTensors[opsIdx][i], 0);
 				int nOutputSize = (int)TF_Dim(vtOutputTensors[opsIdx][i], 1) * (int)TF_Dim(vtOutputTensors[opsIdx][i], 1);
-				float *output = new float[nBatch * nOutputSize];
-				std::memcpy(output, TF_TensorData(vtOutputTensors[opsIdx][i]), nBatch * nOutputSize * sizeof(float));
+				float *pOutput = new float[nBatch * nOutputSize];
+				std::memcpy(pOutput, TF_TensorData(vtOutputTensors[opsIdx][i]), nBatch * nOutputSize * sizeof(float));
 				for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
 				{
-					vtResultOp.push_back(output);
+					float* pOutputBatch = new float[nOutputSize];
+					std::memcpy(pOutputBatch, pOutput + batchIdx * nOutputSize, nOutputSize * sizeof(float));
+					vtResultOp.push_back(pOutputBatch);
+				}
+				delete[] pOutput;
+			}
+			m_vtOutputRes.push_back(vtResultOp);
+		}
+		return m_vtOutputRes;
+	}
+
+	bool Segmentation::FreeOutputMap()
+	{
+		if (!m_vtOutputRes.empty())
+		{
+			for (int opsIdx = 0; opsIdx < m_vtOutputRes.size(); ++opsIdx)//output operator °¹¼ö iteration
+			{
+				for (int nIdx = 0; nIdx < m_vtOutputRes[opsIdx].size(); ++nIdx)
+				{
+					delete[] m_vtOutputRes[opsIdx][nIdx];
 				}
 			}
-			vtResult.push_back(vtResultOp);
 		}
-		return vtResult;
+		return true;
 	}
 }

@@ -17,10 +17,10 @@ public:
 	TFCore();
 	~TFCore();
 
-	__declspec(dllexport) bool LoadModel(const char *, std::vector<const char *> &, std::vector<const char *> &);
-	__declspec(dllexport) bool Run(float ***, int, int);
-	__declspec(dllexport) bool Run(float **, int, int);
-	__declspec(dllexport) bool FreeModel();
+	bool LoadModel(const char *, std::vector<const char *> &, std::vector<const char *> &);
+	bool Run(float ***, int, int);
+	bool Run(float **, int, int);
+	bool FreeModel();
 
 protected:
 	const char *m_ModelPath;

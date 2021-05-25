@@ -12,15 +12,15 @@ int main()
 
 	cv::Mat *tt = new cv::Mat();
 
-	cv::Mat Image1 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/01.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image2 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/02.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image3 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/03.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image4 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/04.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image5 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/05.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image6 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/06.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image7 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/07.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image8 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/08.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image9 = cv::imread("D:/Public/qtkim/WIND2_ADC/DATA/Test/0.good/09.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image1 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/01.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image2 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/02.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image3 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/03.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image4 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/04.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image5 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/05.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image6 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/06.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image7 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/07.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image8 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/08.jpeg", cv::IMREAD_GRAYSCALE);
+	cv::Mat Image9 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/09.jpeg", cv::IMREAD_GRAYSCALE);
 	cv::resize(Image1, Image1, cv::Size(224, 224));
 	cv::resize(Image2, Image2, cv::Size(224, 224));
 	cv::resize(Image3, Image3, cv::Size(224, 224));
@@ -101,7 +101,7 @@ int main()
 	std::vector<std::vector<std::vector<float>>> vtResult;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	Cls->LoadModel("D:/Public/qtkim/WIND2_ADC/saved_model_adc/model_1", vtInputOpNames, vtOutputOpNames);
+	Cls->LoadModel("D:/Work/01_TF_C/saved_model_adc/model_1", vtInputOpNames, vtOutputOpNames);
 	Cls->Run(ImageSet, 9, 4); //ImageData, ImageDataNum, Batch
 	vtResult = Cls->GetResult();
 	Cls->FreeModel();

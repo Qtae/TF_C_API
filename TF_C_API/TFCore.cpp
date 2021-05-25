@@ -19,9 +19,9 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 	m_Graph = TF_NewGraph();
 	m_Status = TF_NewStatus();
 	m_MetaGraph = TF_NewBuffer();
-	m_Session = TF_NewSession(m_Graph, m_SessionOptions, m_Status);
+	m_Session = TF_NewSession(m_Graph, m_SessionOptions, m_Status);//Session --> 2GB
 	const char *tag = "serve";
-	m_Session = TF_LoadSessionFromSavedModel(m_SessionOptions, m_RunOptions, m_ModelPath, &tag, 1, m_Graph, m_MetaGraph, m_Status);
+	m_Session = TF_LoadSessionFromSavedModel(m_SessionOptions, m_RunOptions, m_ModelPath, &tag, 1, m_Graph, m_MetaGraph, m_Status);//Session --> ~10GB
 
 	m_nInputOps = (int)vtInputOpNames.size();
 	m_nOutputOps = (int)vtOutputOpNames.size();
@@ -245,9 +245,6 @@ bool TFCore::Run(float **ppImageSet, int nImage, int nBatch)
 
 bool TFCore::FreeModel()
 {
-	m_bModelLoaded = false;
-	m_bDataLoaded = false;
-
 	for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 		delete[] m_InputDims[opsIdx];
 	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
@@ -265,17 +262,21 @@ bool TFCore::FreeModel()
 		TF_DeleteBuffer(m_RunOptions);
 	if (m_MetaGraph != nullptr)
 		TF_DeleteBuffer(m_MetaGraph);
-	if (m_SessionOptions != nullptr)
-		TF_DeleteSessionOptions(m_SessionOptions);
+	TF_Code asdf = TF_GetCode(m_Status);
 	if (m_Session != nullptr)
 	{
 		TF_CloseSession(m_Session, m_Status);
 		TF_DeleteSession(m_Session, m_Status);
 	}
+	if (m_SessionOptions != nullptr)
+		TF_DeleteSessionOptions(m_SessionOptions);
 	if (m_Graph != nullptr)
 		TF_DeleteGraph(m_Graph);
 	if (m_Status != nullptr)
 		TF_DeleteStatus(m_Status);
+
+	m_bModelLoaded = false;
+	m_bDataLoaded = false;
 
 	return true;
 }
