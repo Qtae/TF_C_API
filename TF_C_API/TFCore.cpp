@@ -3,6 +3,21 @@
 
 TFCore::TFCore()
 {
+	m_Session = nullptr;
+	m_RunOptions = nullptr;
+	m_SessionOptions = nullptr;
+	m_Graph = nullptr;
+	m_Status = nullptr;
+	m_MetaGraph = nullptr;
+	m_arrInputOps = nullptr;
+	m_arrOutputOps = nullptr;
+	m_nInputDims = nullptr;
+	m_nOutputDims = nullptr;
+	m_InputDims = nullptr;
+	m_OutputDims = nullptr;
+	m_InputDataSizePerBatch = nullptr;
+	m_OutputDataSizePerBatch = nullptr;
+
 	m_bModelLoaded = false;
 	m_bDataLoaded = false;
 }
@@ -11,7 +26,7 @@ TFCore::~TFCore()
 {
 }
 
-bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInputOpNames, std::vector<const char *> &vtOutputOpNames)
+bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputOpNames, std::vector<const char*> &vtOutputOpNames)
 {
 	m_ModelPath = ModelPath;
 	m_RunOptions = TF_NewBufferFromString("", 0);
@@ -20,7 +35,7 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 	m_Status = TF_NewStatus();
 	m_MetaGraph = TF_NewBuffer();
 	m_Session = TF_NewSession(m_Graph, m_SessionOptions, m_Status);//Session --> 2GB
-	const char *tag = "serve";
+	const char* tag = "serve";
 	m_Session = TF_LoadSessionFromSavedModel(m_SessionOptions, m_RunOptions, m_ModelPath, &tag, 1, m_Graph, m_MetaGraph, m_Status);//Session --> ~10GB
 
 	m_nInputOps = (int)vtInputOpNames.size();
@@ -43,7 +58,7 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 
 	for (int i = 0; i < m_nInputOps; ++i)
 	{
-		TF_Operation *InputOp = TF_GraphOperationByName(m_Graph, vtInputOpNames[i]);
+		TF_Operation* InputOp = TF_GraphOperationByName(m_Graph, vtInputOpNames[i]);
 		if (InputOp == nullptr)
 		{
 			std::cout << "Failed to find graph operation" << std::endl;
@@ -51,7 +66,7 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 		}
 		m_arrInputOps[i] = TF_Output{ InputOp, 0 };
 		m_nInputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrInputOps[0], m_Status);
-		int64_t *InputShape = new int64_t[m_nInputDims[i]];
+		int64_t* InputShape = new int64_t[m_nInputDims[i]];
 		TF_GraphGetTensorShape(m_Graph, m_arrInputOps[0], InputShape, m_nInputDims[i], m_Status);
 		m_InputDims[i] = new long long[m_nInputDims[i]];
 		m_InputDims[i][0] = static_cast<long long>(1);
@@ -63,7 +78,7 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 
 	for (int i = 0; i < m_nOutputOps; ++i)
 	{
-		TF_Operation *OutputOp = TF_GraphOperationByName(m_Graph, vtOutputOpNames[i]);
+		TF_Operation* OutputOp = TF_GraphOperationByName(m_Graph, vtOutputOpNames[i]);
 		if (OutputOp == nullptr)
 		{
 			std::cout << "Failed to find graph operation" << std::endl;
@@ -71,7 +86,7 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 		}
 		m_arrOutputOps[i] = TF_Output{ OutputOp, 0 };
 		m_nOutputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrOutputOps[0], m_Status);
-		int64_t *OutputShape = new int64_t[m_nOutputDims[i]];
+		int64_t* OutputShape = new int64_t[m_nOutputDims[i]];
 		TF_GraphGetTensorShape(m_Graph, m_arrOutputOps[0], OutputShape, m_nOutputDims[i], m_Status);
 		m_OutputDims[i] = new long long[m_nOutputDims[i]];
 		m_OutputDims[i][0] = static_cast<long long>(1);
@@ -85,7 +100,7 @@ bool TFCore::LoadModel(const char *ModelPath, std::vector<const char *> &vtInput
 	return true;
 }
 
-bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
+bool TFCore::Run(float*** ppImageSet, int nBatch, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -93,17 +108,19 @@ bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
 		return false;
 	}
 
-	TF_Tensor **arrInputTensors = new TF_Tensor*[m_nInputOps];
-	TF_Tensor **arrOutputTensors = new TF_Tensor*[m_nOutputOps];
+	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
 
-	if(!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
+	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
+
+	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
-		std::vector<TF_Tensor *> vt;
+		std::vector<TF_Tensor*> vt;
 		vtOutputTensors.push_back(vt);
 	}
 
-	auto const Deallocator = [](void *, std::size_t, void *) {};
+	auto const Deallocator = [](void*, std::size_t, void*) {};
 
 	int nBatchIter = nImage / nBatch + (int)(bool)(nImage % nBatch);
 
@@ -114,24 +131,24 @@ bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
 			nCurrBatch = nImage % nBatch;
 		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 		{
-			float *ImageData = new float[nCurrBatch * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]];//opsIdx 바뀌어도 주소가 안바뀌는지
+			float *ImageData = new float[nCurrBatch * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]];
 			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 			{
 				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
 				{
-					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = ppImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx] / 255.;
+					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = ppImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx];
 				}
 			}
 			m_InputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
 			size_t InputDataSize = m_InputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
 
-			TF_Tensor *InputImageTensor = TF_NewTensor(TF_FLOAT,
-													   m_InputDims[opsIdx],
-													   m_nInputDims[opsIdx],
-													   ImageData,
-													   InputDataSize,
-													   Deallocator,
-													   nullptr);
+			TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+				m_InputDims[opsIdx],
+				m_nInputDims[opsIdx],
+				ImageData,
+				InputDataSize,
+				Deallocator,
+				nullptr);
 			arrInputTensors[opsIdx] = InputImageTensor;
 
 			delete[] ImageData;
@@ -146,9 +163,9 @@ bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
 		}
 
 		TF_SessionRun(m_Session, m_RunOptions,
-					  m_arrInputOps, arrInputTensors, m_nInputOps,
-					  m_arrOutputOps, arrOutputTensors, m_nOutputOps,
-					  nullptr, 0, nullptr, m_Status);
+			m_arrInputOps, arrInputTensors, m_nInputOps,
+			m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+			nullptr, 0, nullptr, m_Status);
 
 		//Input Tensor 메모리 해제
 		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
@@ -167,7 +184,7 @@ bool TFCore::Run(float ***ppImageSet, int nImage, int nBatch)
 	return true;
 }
 
-bool TFCore::Run(float **ppImageSet, int nImage, int nBatch)
+bool TFCore::Run(float** ppImageSet, int nBatch, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -175,17 +192,19 @@ bool TFCore::Run(float **ppImageSet, int nImage, int nBatch)
 		return false;
 	}
 
-	TF_Tensor **arrInputTensors = new TF_Tensor*[m_nInputOps];
-	TF_Tensor **arrOutputTensors = new TF_Tensor*[m_nOutputOps];
+	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+
+	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
+	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 
 	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
-		std::vector<TF_Tensor *> vt;
+		std::vector<TF_Tensor*> vt;
 		vtOutputTensors.push_back(vt);
 	}
 
-	auto const Deallocator = [](void *, std::size_t, void *) {};
+	auto const Deallocator = [](void*, std::size_t, void*) {};
 
 	int nBatchIter = nImage / nBatch + (int)(bool)(nImage % nBatch);
 
@@ -195,18 +214,180 @@ bool TFCore::Run(float **ppImageSet, int nImage, int nBatch)
 		if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
 			nCurrBatch = nImage % nBatch;
 
-		float *ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2]];//opsIdx 바뀌어도 주소가 안바뀌는지
+		float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2]];
 		for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 		{
 			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
 			{
-				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = ppImageSet[batchIdx * nBatch + dataIdx][pixIdx] / 255.;
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = ppImageSet[batchIdx * nBatch + dataIdx][pixIdx];
 			}
 		}
 		m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
 		size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
 
-		TF_Tensor *InputImageTensor = TF_NewTensor(TF_FLOAT,
+		TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+			m_InputDims[0],
+			m_nInputDims[0],
+			ImageData,
+			InputDataSize,
+			Deallocator,
+			nullptr);
+
+		arrInputTensors[0] = InputImageTensor;
+
+		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+		{
+			m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+			size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+
+			arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+		}
+
+		TF_SessionRun(m_Session, m_RunOptions,
+			m_arrInputOps, arrInputTensors, m_nInputOps,
+			m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+			nullptr, 0, nullptr, m_Status);
+
+		//Input Tensor 메모리 해제
+		TF_DeleteTensor(arrInputTensors[0]);
+
+		if (TF_GetCode(m_Status) != TF_OK)
+		{
+			return false;
+		}
+
+		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+	}
+	return true;
+}
+
+bool TFCore::Run(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
+{
+	if (!m_bModelLoaded)
+	{
+		std::cout << "Model Not Loaded!" << std::endl;
+		return false;
+	}
+
+	int nImage = (int)(_msize(ppImageSet) / sizeof(unsigned char*));
+
+	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
+	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
+
+	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
+	{
+		std::vector<TF_Tensor*> vt;
+		vtOutputTensors.push_back(vt);
+	}
+
+	auto const Deallocator = [](void*, std::size_t, void*) {};
+
+	int nBatchIter = nImage / nBatch + (int)(bool)(nImage % nBatch);
+
+	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	{
+		int nCurrBatch = nBatch;
+		if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
+			nCurrBatch = nImage % nBatch;
+		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
+		{
+			float* ImageData = new float[nCurrBatch * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]];
+			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				{
+					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = (float)(ppImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx]);
+				}
+			}
+			m_InputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+			size_t InputDataSize = m_InputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+
+			TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+				m_InputDims[opsIdx],
+				m_nInputDims[opsIdx],
+				ImageData,
+				InputDataSize,
+				Deallocator,
+				nullptr);
+			arrInputTensors[opsIdx] = InputImageTensor;
+
+			delete[] ImageData;
+		}
+
+		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+		{
+			m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+			size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+
+			arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+		}
+
+		TF_SessionRun(m_Session, m_RunOptions,
+			m_arrInputOps, arrInputTensors, m_nInputOps,
+			m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+			nullptr, 0, nullptr, m_Status);
+
+		//Input Tensor 메모리 해제
+		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
+		{
+			TF_DeleteTensor(arrInputTensors[opsIdx]);
+		}
+
+		if (TF_GetCode(m_Status) != TF_OK)
+		{
+			return false;
+		}
+
+		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+	}
+	return true;
+}
+
+bool TFCore::Run(unsigned char** ppImageSet, int nBatch, bool bNormalize)
+{
+	if (!m_bModelLoaded)
+	{
+		std::cout << "Model Not Loaded!" << std::endl;
+		return false;
+	}
+
+	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+
+	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
+	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
+
+	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
+	{
+		std::vector<TF_Tensor*> vt;
+		vtOutputTensors.push_back(vt);
+	}
+
+	auto const Deallocator = [](void*, std::size_t, void*) {};
+
+	int nBatchIter = nImage / nBatch + (int)(bool)(nImage % nBatch);
+
+	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	{
+		int nCurrBatch = nBatch;
+		if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
+			nCurrBatch = nImage % nBatch;
+
+		float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2]];
+		for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+		{
+			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			{
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = (float)(ppImageSet[batchIdx * nBatch + dataIdx][pixIdx]);
+			}
+		}
+		m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
+		size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
+
+		TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
 			m_InputDims[0],
 			m_nInputDims[0],
 			ImageData,
@@ -262,7 +443,6 @@ bool TFCore::FreeModel()
 		TF_DeleteBuffer(m_RunOptions);
 	if (m_MetaGraph != nullptr)
 		TF_DeleteBuffer(m_MetaGraph);
-	TF_Code asdf = TF_GetCode(m_Status);
 	if (m_Session != nullptr)
 	{
 		TF_CloseSession(m_Session, m_Status);
@@ -279,4 +459,8 @@ bool TFCore::FreeModel()
 	m_bDataLoaded = false;
 
 	return true;
+}
+
+bool TFCore::_Run()
+{
 }
