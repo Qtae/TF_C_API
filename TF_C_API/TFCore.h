@@ -19,12 +19,19 @@ public:
 
 	bool LoadModel(const char*, std::vector<const char*> &, std::vector<const char*> &);
 
-	bool Run(float***, int, bool bNormalize = false);
-	bool Run(float**, int, bool bNormalize = false);
-	bool Run(unsigned char***, int, bool bNormalize = false);
-	bool Run(unsigned char**, int, bool bNormalize = false);
-	bool Run(std::vector<std::vector<cv::Mat>>, int, bool bNormalize = false);
-	bool Run(std::vector<cv::Mat>, int, bool bNormalize = false);
+	bool Run(float**, bool bNormalize = false);
+	bool Run(float***, bool bNormalize = false);
+	bool Run(unsigned char**, bool bNormalize = false);
+	bool Run(unsigned char***, bool bNormalize = false);
+	bool Run(std::vector<std::vector<cv::Mat>>, bool bNormalize = false);
+	bool Run(std::vector<cv::Mat>, bool bNormalize = false);
+
+	bool BatchRun(float***, int, bool bNormalize = false);
+	bool BatchRun(float**, int, bool bNormalize = false);
+	bool BatchRun(unsigned char***, int, bool bNormalize = false);
+	bool BatchRun(unsigned char**, int, bool bNormalize = false);
+	bool BatchRun(std::vector<std::vector<cv::Mat>>, int, bool bNormalize = false);
+	bool BatchRun(std::vector<cv::Mat>, int, bool bNormalize = false);
 
 	bool FreeModel();
 
