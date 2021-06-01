@@ -64,5 +64,5 @@ protected:
 	std::size_t* m_InputDataSizePerBatch;
 	std::size_t* m_OutputDataSizePerBatch;
 
-	std::vector<std::vector<TF_Tensor*>> vtOutputTensors;
+	std::vector<std::vector<TF_Tensor*>> m_vtOutputTensors;
 };

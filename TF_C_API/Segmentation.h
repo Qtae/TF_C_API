@@ -9,6 +9,8 @@ namespace TFTool
 		Segmentation();
 		~Segmentation();
 		std::vector<std::vector<float*>> GetOutput();
+		std::vector<std::vector<int*>> GetWholeSegMap();
+		std::vector<std::vector<int*>> GetSegMapWithClsIndex(int);
 
 	private:
 		bool FreeOutputMap();

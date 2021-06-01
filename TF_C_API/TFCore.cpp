@@ -113,11 +113,11 @@ bool TFCore::Run(float*** ppImageSet, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -172,7 +172,7 @@ bool TFCore::Run(float*** ppImageSet, bool bNormalize)
 	}
 
 	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-		vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+		m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 
 	return true;
 }
@@ -190,11 +190,11 @@ bool TFCore::Run(float** ppImageSet, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -242,7 +242,7 @@ bool TFCore::Run(float** ppImageSet, bool bNormalize)
 	}
 
 	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-		vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+		m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 
 	return true;
 }
@@ -260,11 +260,11 @@ bool TFCore::Run(unsigned char*** ppImageSet, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -319,7 +319,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, bool bNormalize)
 	}
 
 	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-		vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+		m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 
 	return true;
 }
@@ -337,11 +337,11 @@ bool TFCore::Run(unsigned char** ppImageSet, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -389,7 +389,7 @@ bool TFCore::Run(unsigned char** ppImageSet, bool bNormalize)
 	}
 
 	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-		vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+		m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 
 	return true;
 }
@@ -407,11 +407,11 @@ bool TFCore::BatchRun(float*** ppImageSet, int nBatch, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -473,7 +473,7 @@ bool TFCore::BatchRun(float*** ppImageSet, int nBatch, bool bNormalize)
 		}
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 	}
 	return true;
 }
@@ -491,11 +491,11 @@ bool TFCore::BatchRun(float** ppImageSet, int nBatch, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -551,7 +551,7 @@ bool TFCore::BatchRun(float** ppImageSet, int nBatch, bool bNormalize)
 		}
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 	}
 	return true;
 }
@@ -569,11 +569,11 @@ bool TFCore::BatchRun(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -635,7 +635,7 @@ bool TFCore::BatchRun(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
 		}
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 	}
 	return true;
 }
@@ -653,11 +653,11 @@ bool TFCore::BatchRun(unsigned char** ppImageSet, int nBatch, bool bNormalize)
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
 
-	if (!(vtOutputTensors.empty())) vtOutputTensors.clear();
+	if (!(m_vtOutputTensors.empty())) m_vtOutputTensors.clear();
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
-		vtOutputTensors.push_back(vt);
+		m_vtOutputTensors.push_back(vt);
 	}
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
@@ -713,7 +713,7 @@ bool TFCore::BatchRun(unsigned char** ppImageSet, int nBatch, bool bNormalize)
 		}
 
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-			vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 	}
 	return true;
 }
