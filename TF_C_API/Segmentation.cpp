@@ -41,7 +41,7 @@ namespace TFTool
 	{
 		if (!m_vtOutputRes.empty())
 		{
-			for (int opsIdx = 0; opsIdx < m_vtOutputRes.size(); ++opsIdx)//output operator °¹¼ö iteration
+			for (int opsIdx = 0; opsIdx < m_vtOutputRes.size(); ++opsIdx)
 			{
 				for (int nIdx = 0; nIdx < m_vtOutputRes[opsIdx].size(); ++nIdx)
 				{
