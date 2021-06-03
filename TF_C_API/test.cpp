@@ -252,12 +252,14 @@ int main()
 	Seg->LoadModel("D:/Work/01_TF_C/segmentation_model", vtInputOpNames, vtOutputOpNames);
 	Seg->Run(ImageSet, 4); //ImageData, Batch
 	vtResult = Seg->GetOutput();
+	int i = 0;
 	for (std::vector<float*>::iterator it = vtResult[0].begin(); it != vtResult[0].end(); ++it)
 	{
 		float* imagef = *it;
 		cv::Mat MatImage(64, 64, CV_32FC(1));
 		std::memcpy(MatImage.data, imagef, 64 * 64 * sizeof(float));
 		cv::imshow("img", MatImage);
+		//cv::imwrite("D:/Work/01_TF_C/99.jpeg", MatImage);
 		cv::waitKey();
 	}
 
