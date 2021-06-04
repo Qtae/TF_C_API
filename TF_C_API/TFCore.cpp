@@ -100,7 +100,7 @@ bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputO
 	return true;
 }
 
-bool TFCore::Run(float*** ppImageSet, bool bNormalize)
+bool TFCore::Run(float*** pImageSet, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -108,7 +108,7 @@ bool TFCore::Run(float*** ppImageSet, bool bNormalize)
 		return false;
 	}
 	
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 	
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
@@ -129,7 +129,7 @@ bool TFCore::Run(float*** ppImageSet, bool bNormalize)
 		{
 			for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
 			{
-				ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = ppImageSet[dataIdx][opsIdx][pixIdx];
+				ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = pImageSet[dataIdx][opsIdx][pixIdx];
 			}
 		}
 		m_InputDims[opsIdx][0] = static_cast<long long>(nImage);
@@ -176,7 +176,7 @@ bool TFCore::Run(float*** ppImageSet, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(float** ppImageSet, bool bNormalize)
+bool TFCore::Run(float** pImageSet, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -184,7 +184,7 @@ bool TFCore::Run(float** ppImageSet, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
@@ -203,7 +203,7 @@ bool TFCore::Run(float** ppImageSet, bool bNormalize)
 	{
 		for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
 		{
-			ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = ppImageSet[dataIdx][pixIdx];
+			ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = pImageSet[dataIdx][pixIdx];
 		}
 	}
 	m_InputDims[0][0] = static_cast<long long>(nImage);
@@ -246,7 +246,7 @@ bool TFCore::Run(float** ppImageSet, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char*** ppImageSet, bool bNormalize)
+bool TFCore::Run(unsigned char*** pImageSet, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -254,7 +254,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
@@ -275,7 +275,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, bool bNormalize)
 		{
 			for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
 			{
-				ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = (float)(ppImageSet[dataIdx][opsIdx][pixIdx]);
+				ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = (float)(pImageSet[dataIdx][opsIdx][pixIdx]);
 			}
 		}
 		m_InputDims[opsIdx][0] = static_cast<long long>(nImage);
@@ -323,7 +323,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** ppImageSet, bool bNormalize)
+bool TFCore::Run(unsigned char** pImageSet, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -331,7 +331,7 @@ bool TFCore::Run(unsigned char** ppImageSet, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
@@ -350,7 +350,7 @@ bool TFCore::Run(unsigned char** ppImageSet, bool bNormalize)
 	{
 		for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
 		{
-			ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = (float)(ppImageSet[dataIdx][pixIdx]);
+			ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = (float)(pImageSet[dataIdx][pixIdx]);
 		}
 	}
 	m_InputDims[0][0] = static_cast<long long>(nImage);
@@ -393,7 +393,7 @@ bool TFCore::Run(unsigned char** ppImageSet, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(float*** ppImageSet, int nBatch, bool bNormalize)
+bool TFCore::Run(float*** pImageSet, int nBatch, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -401,7 +401,7 @@ bool TFCore::Run(float*** ppImageSet, int nBatch, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
@@ -431,7 +431,7 @@ bool TFCore::Run(float*** ppImageSet, int nBatch, bool bNormalize)
 				{
 					for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
 					{
-						ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = ppImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx];
+						ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx];
 					}
 				}
 			}
@@ -480,7 +480,7 @@ bool TFCore::Run(float*** ppImageSet, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(float** ppImageSet, int nBatch, bool bNormalize)
+bool TFCore::Run(float** pImageSet, int nBatch, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -488,7 +488,7 @@ bool TFCore::Run(float** ppImageSet, int nBatch, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
@@ -517,7 +517,7 @@ bool TFCore::Run(float** ppImageSet, int nBatch, bool bNormalize)
 			{
 				for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
 				{
-					ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = ppImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx];
+					ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx];
 				}
 			}
 		}
@@ -561,7 +561,7 @@ bool TFCore::Run(float** ppImageSet, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
+bool TFCore::Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -569,7 +569,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(unsigned char*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(unsigned char*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
@@ -599,7 +599,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
 				{
 					for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
 					{
-						ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = (float)(ppImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx]);
+						ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx]);
 					}
 				}
 			}
@@ -648,7 +648,7 @@ bool TFCore::Run(unsigned char*** ppImageSet, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** ppImageSet, int nBatch, bool bNormalize)
+bool TFCore::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
 {
 	if (!m_bModelLoaded)
 	{
@@ -656,7 +656,7 @@ bool TFCore::Run(unsigned char** ppImageSet, int nBatch, bool bNormalize)
 		return false;
 	}
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nImage = (int)(_msize(pImageSet) / sizeof(float*));
 
 	TF_Tensor** arrInputTensors = new TF_Tensor *[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor *[m_nOutputOps];
@@ -685,7 +685,7 @@ bool TFCore::Run(unsigned char** ppImageSet, int nBatch, bool bNormalize)
 			{
 				for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
 				{
-					ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = (float)(ppImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx]);
+					ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx]);
 				}
 			}
 		}
@@ -729,8 +729,8 @@ bool TFCore::Run(unsigned char** ppImageSet, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(float** ppImageSet, CPoint ptCropSize, int nBatch, bool bNormalize)
-//VisionWorks Image Input Format
+bool TFCore::Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSize, int nBatch, bool bNormalize)
+//VisionWorks image input format, has only one input operator
 {
 	if (!m_bModelLoaded)
 	{
@@ -738,9 +738,40 @@ bool TFCore::Run(float** ppImageSet, CPoint ptCropSize, int nBatch, bool bNormal
 		return false;
 	}
 
-	float* norm_img = new float[];
+	CPoint ptImageSize = CPoint(sizeof(ppImage[0]) / sizeof(unsigned char), sizeof(ppImage) / sizeof(ppImage[0]));
 
-	int nImage = (int)(_msize(ppImageSet) / sizeof(float*));
+	int nIterX = (int)(ptImageSize.x / (ptCropSize.x - ptOverlapSize.x));
+	int nIterY = (int)(ptImageSize.y / (ptCropSize.y - ptOverlapSize.y));
+	if (ptImageSize.x - ((ptCropSize.x - ptOverlapSize.x) * (nIterX - 1)) > ptCropSize.x) ++nIterX;
+	if (ptImageSize.y - ((ptCropSize.y - ptOverlapSize.y) * (nIterY - 1)) > ptCropSize.y) ++nIterY;
+	int nCurrIterX = 0;
+	int nCurrIterY = 0;
+
+	int nImage = nIterX * nIterY;
+	int nImageChannel = m_InputDims[0][3];
+
+	float** pImageSet = new float*[nImage];
+	for (int yIdx = 0; yIdx < nIterY; ++yIdx)
+	{
+		if(nCurrIterY + yIdx > ptImageSize.y) nCurrIterY = ptImageSize.y - yIdx;
+		for (int xIdx = 0; xIdx < nIterX; ++xIdx)
+		{
+			if (nCurrIterX + xIdx > ptImageSize.x) nCurrIterX = ptImageSize.x - xIdx;
+			float* pCropImage = new float[ptCropSize.x * ptCropSize.y * nImageChannel];
+			for (int y = 0; y < ptCropSize.y; ++y)
+			{
+				for (int x = 0; x < ptCropSize.x; ++x)
+				{
+					for (int c = 0; c < nImageChannel; ++c)
+					{
+						//suppose that ATI programs using same channel convention with 1ch.(channel info is in 2nd iteration)
+						pCropImage[y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[nCurrIterY + y][nCurrIterX + x * nImageChannel + c]);
+					}
+				}
+			}
+			pImageSet[yIdx * nIterX + xIdx] = pCropImage;
+		}
+	}
 
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
@@ -767,7 +798,7 @@ bool TFCore::Run(float** ppImageSet, CPoint ptCropSize, int nBatch, bool bNormal
 		{
 			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
 			{
-				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = ppImageSet[batchIdx * nBatch + dataIdx][pixIdx];
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = pImageSet[batchIdx * nBatch + dataIdx][pixIdx];
 			}
 		}
 		m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
@@ -807,6 +838,7 @@ bool TFCore::Run(float** ppImageSet, CPoint ptCropSize, int nBatch, bool bNormal
 		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 			m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 	}
+	
 	return true;
 }
 

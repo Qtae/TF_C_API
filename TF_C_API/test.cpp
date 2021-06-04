@@ -118,6 +118,7 @@ int main()
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	*/
 
+	/*
 	TFTool::Segmentation* Seg = new TFTool::Segmentation();
 
 	std::vector<const char*> vtInputOpNames;
@@ -134,7 +135,7 @@ int main()
 	cv::Mat Image7 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0447.png", cv::IMREAD_GRAYSCALE);
 	cv::Mat Image8 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0448.png", cv::IMREAD_GRAYSCALE);
 	cv::Mat Image9 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0449.png", cv::IMREAD_GRAYSCALE);
-	/*
+
 	cv::Mat Mat1(64, 64, CV_32FC(1));
 	cv::Mat Mat2(64, 64, CV_32FC(1));
 	cv::Mat Mat3(64, 64, CV_32FC(1));
@@ -199,8 +200,7 @@ int main()
 	ImageSet[6] = Imageset7f;
 	ImageSet[7] = Imageset8f;
 	ImageSet[8] = Imageset9f;
-	*/
-	/**/
+
 	unsigned char*** ImageSet = new unsigned char**[9];
 	unsigned char** Imageset1b = new unsigned char*[1];
 	unsigned char** Imageset2b = new unsigned char*[1];
@@ -264,4 +264,7 @@ int main()
 	}
 
 	Seg->FreeModel();
+	*/
+
+	TFTool::Segmentation* Seg = new TFTool::Segmentation();
 }

@@ -34,7 +34,8 @@ public:
 	bool Run(std::vector<std::vector<cv::Mat>>, int, bool bNormalize = false);
 	bool Run(std::vector<cv::Mat>, int, bool bNormalize = false);
 
-	bool Run(float**, CPoint, int, bool bNormalize = false);
+	//VisionWorks image input format, has only one input operator
+	bool Run(unsigned char**, CPoint, CPoint,int, bool bNormalize = false);
 
 	bool FreeModel();
 
