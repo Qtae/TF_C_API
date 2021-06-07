@@ -58,13 +58,18 @@ bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputO
 
 	for (int i = 0; i < m_nInputOps; ++i)
 	{
-		TF_Operation* InputOp = TF_GraphOperationByName(m_Graph, vtInputOpNames[i]);
+		char InputOpFullName[200];
+		strcpy_s(InputOpFullName, sizeof(InputOpFullName), (char*)vtInputOpNames[i]);
+		char* chIndex = NULL;
+		const char* InputOpName = strtok_s(InputOpFullName, ":", &chIndex);
+		int nInputOpOutputIndex = atoi(chIndex);
+		TF_Operation* InputOp = TF_GraphOperationByName(m_Graph, InputOpName);
 		if (InputOp == nullptr)
 		{
 			std::cout << "Failed to find graph operation" << std::endl;
 			return false;
 		}
-		m_arrInputOps[i] = TF_Output{ InputOp, 0 };
+		m_arrInputOps[i] = TF_Output{ InputOp, nInputOpOutputIndex };
 		m_nInputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrInputOps[0], m_Status);
 		int64_t* InputShape = new int64_t[m_nInputDims[i]];
 		TF_GraphGetTensorShape(m_Graph, m_arrInputOps[0], InputShape, m_nInputDims[i], m_Status);
@@ -78,13 +83,19 @@ bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputO
 
 	for (int i = 0; i < m_nOutputOps; ++i)
 	{
-		TF_Operation* OutputOp = TF_GraphOperationByName(m_Graph, vtOutputOpNames[i]);
+		char OutputOpFullName[200];
+		strcpy_s(OutputOpFullName, sizeof(OutputOpFullName), (char*)vtOutputOpNames[i]);
+		char* chIndex = NULL;
+		const char* OutputOpName = strtok_s(OutputOpFullName, ":", &chIndex);
+		int nOutputOpOutputIndex = atoi(chIndex);
+		TF_Operation* OutputOp = TF_GraphOperationByName(m_Graph, OutputOpName);
 		if (OutputOp == nullptr)
 		{
 			std::cout << "Failed to find graph operation" << std::endl;
 			return false;
 		}
-		m_arrOutputOps[i] = TF_Output{ OutputOp, 0 };
+		int n = TF_OperationNumOutputs(OutputOp);
+		m_arrOutputOps[i] = TF_Output{ OutputOp, nOutputOpOutputIndex };
 		m_nOutputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrOutputOps[0], m_Status);
 		int64_t* OutputShape = new int64_t[m_nOutputDims[i]];
 		TF_GraphGetTensorShape(m_Graph, m_arrOutputOps[0], OutputShape, m_nOutputDims[i], m_Status);
@@ -95,7 +106,6 @@ bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputO
 		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDataSizePerBatch[i] = m_OutputDataSizePerBatch[i] * static_cast<int>(OutputShape[j]);
 		delete[] OutputShape;
 	}
-
 	m_bModelLoaded = true;
 	return true;
 }
@@ -748,7 +758,7 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSiz
 	int nCurrIterY = 0;
 
 	int nImage = nIterX * nIterY;
-	int nImageChannel = m_InputDims[0][3];
+	int nImageChannel = (int)(m_InputDims[0][3]);
 
 	float** pImageSet = new float*[nImage];
 	for (int yIdx = 0; yIdx < nIterY; ++yIdx)

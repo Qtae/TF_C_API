@@ -197,6 +197,7 @@
     <ClCompile Include="Segmentation.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="TFCore.cpp" />
+    <ClCompile Include="TFTool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
