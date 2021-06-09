@@ -301,4 +301,5 @@ int main()
 
 	Det->LoadModel("D:/Work/01_TF_C/test/yolov4-tflite-train_tf-epoch2000", vtInputOpNames, vtOutputOpNames);
 	Det->Run(ImageSet, 2); //ImageData, Batch
+	Det->GetDetectionResults();
 }
