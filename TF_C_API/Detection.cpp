@@ -10,7 +10,7 @@ Detection::~Detection()
 
 bool CompareScore(DetectionResult x, DetectionResult y)
 {
-	if (x.Score > y.Score) return true;
+	if (x.Score * x.Objectness > y.Score * y.Objectness) return true;
 	else return false;
 }
 
@@ -28,29 +28,47 @@ float Detection::CalculateIOU(DetectionResult Box1, DetectionResult Box2)
 	return float(OverlapArea) / float(Box1Area + Box2Area - OverlapArea);
 }
 
-void Detection::DoNMS(std::vector<DetectionResult> &vtDetRes, float fNMSThres)
+void Detection::DoNMS(std::vector<DetectionResult>& vtDetRes, float fIOUThres, float fScoreThres, int nClass)
 {
 	if (vtDetRes.empty()) return;
-	sort(vtDetRes.begin(), vtDetRes.end(), CompareScore);//sort the candidate boxes by confidence
-	for (int i = 0; i < vtDetRes.size(); i++)
+	std::vector<std::vector<DetectionResult>> vtDetResOfEachClass;
+	for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
 	{
-		if (vtDetRes[i].Score > 0)
+		std::vector<DetectionResult> tmp;
+		for (std::vector<DetectionResult>::iterator it = vtDetRes.begin(); it != vtDetRes.end();)
 		{
-			for (int j = i + 1; j < vtDetRes.size(); j++)
+			if ((*it).BestClass == clsIdx)
 			{
-				if (vtDetRes[j].Score > 0)
+				tmp.push_back(*it);
+				it = vtDetRes.erase(it);
+			}
+			else it++;
+		}
+		ApplyScoreThreshold(tmp, fScoreThres);
+		sort(tmp.begin(), tmp.end(), CompareScore);//sort the candidate boxes by confidence
+		vtDetResOfEachClass.push_back(tmp);
+	}
+
+	for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+	{
+		for (int i = 0; i < vtDetResOfEachClass[clsIdx].size(); i++)
+		{
+			if (vtDetResOfEachClass[clsIdx][i].Score > 0)
+			{
+				for (int j = i + 1; j < vtDetResOfEachClass[clsIdx].size(); j++)
 				{
-					float iou = CalculateIOU(vtDetRes[i], vtDetRes[j]);//calculate the orthogonal ratio
-					if (iou < fNMSThres) vtDetRes[j].Score = 0;
+					if (vtDetResOfEachClass[clsIdx][j].Score > 0)
+					{
+						float iou = CalculateIOU(vtDetResOfEachClass[clsIdx][i], vtDetResOfEachClass[clsIdx][j]);//calculate the orthogonal ratio
+						if (iou > fIOUThres) vtDetResOfEachClass[clsIdx][j].Score = 0;
+					}
 				}
 			}
 		}
-	}
-
-	for (std::vector<DetectionResult>::iterator it = vtDetRes.begin(); it != vtDetRes.end();)
-	{
-		if ((*it).Score == 0) it = vtDetRes.erase(it);
-		else it++;
+		for (std::vector<DetectionResult>::iterator it = vtDetResOfEachClass[clsIdx].begin(); it != vtDetResOfEachClass[clsIdx].end(); ++it)
+		{
+			if ((*it).Score != 0) vtDetRes.push_back(*it);
+		}
 	}
 	return;
 }
@@ -65,10 +83,10 @@ void Detection::ApplyScoreThreshold(std::vector<DetectionResult>& vtDetRes, floa
 	return;
 }
 
-std::vector<DetectionResult> Detection::GetDetectionResults(float fNMSThres, float fScoreThres)
+std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float fIOUThres, float fScoreThres)
 {
 	//Suppose there is only one output operation in detection tasks.
-	std::vector<DetectionResult> vtResult;
+	std::vector<std::vector<DetectionResult>> vtResult;
 	int nBatch = (int)m_OutputDims[0][0];
 	int nGridX = (int)m_OutputDims[0][1];
 	int nGridY = (int)m_OutputDims[0][2];
@@ -80,8 +98,9 @@ std::vector<DetectionResult> Detection::GetDetectionResults(float fNMSThres, flo
 		float *output = new float[nBatch * nGridX * nGridY * nAnchor * (nClass + 5)];
 		std::memcpy(output, TF_TensorData(m_vtOutputTensors[0][i]), nBatch * nGridX * nGridY * nAnchor * (nClass + 5) * sizeof(float));
 
-		for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+		for (int imgIdx = 0; imgIdx < nBatch; ++imgIdx)
 		{
+			std::vector<DetectionResult> vtImgResult;
 			for (int grdXIdx = 0; grdXIdx < nGridX; ++grdXIdx)
 			{
 				for (int grdYIdx = 0; grdYIdx < nGridY; ++grdYIdx)
@@ -89,40 +108,40 @@ std::vector<DetectionResult> Detection::GetDetectionResults(float fNMSThres, flo
 					for (int ancIdx = 0; ancIdx < nAnchor; ++ancIdx)
 					{
 						DetectionResult DetRes;
-						DetRes.x = output[batchIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-										+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-										+ grdYIdx * nAnchor * (nClass + 5)
-										+ ancIdx * (nClass + 5)
-										+ 0];
-						DetRes.y = output[batchIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-										+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-										+ grdYIdx * nAnchor * (nClass + 5)
-										+ ancIdx * (nClass + 5)
-										+ 1];
-						DetRes.w = output[batchIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-										+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-										+ grdYIdx * nAnchor * (nClass + 5)
-										+ ancIdx * (nClass + 5)
-										+ 2];
-						DetRes.h = output[batchIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-										+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-										+ grdYIdx * nAnchor * (nClass + 5)
-										+ ancIdx * (nClass + 5)
-										+ 3];
-						DetRes.Objectness = output[batchIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-												 + grdXIdx * nGridY * nAnchor * (nClass + 5)
-												 + grdYIdx * nAnchor * (nClass + 5)
-												 + ancIdx * (nClass + 5)
-												 + 4];
+						DetRes.x = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+							+ grdYIdx * nAnchor * (nClass + 5)
+							+ ancIdx * (nClass + 5)
+							+ 0];
+						DetRes.y = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+							+ grdYIdx * nAnchor * (nClass + 5)
+							+ ancIdx * (nClass + 5)
+							+ 1];
+						DetRes.w = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+							+ grdYIdx * nAnchor * (nClass + 5)
+							+ ancIdx * (nClass + 5)
+							+ 2];
+						DetRes.h = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+							+ grdYIdx * nAnchor * (nClass + 5)
+							+ ancIdx * (nClass + 5)
+							+ 3];
+						DetRes.Objectness = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+							+ grdYIdx * nAnchor * (nClass + 5)
+							+ ancIdx * (nClass + 5)
+							+ 4];
 						int nBestClass = -1;
 						float fScore = 0.;
 						for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
 						{
-							float fCurrScore = output[batchIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-													+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-													+ grdYIdx * nAnchor * (nClass + 5)
-													+ ancIdx * (nClass + 5)
-													+ 5 + clsIdx];
+							float fCurrScore = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+								+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+								+ grdYIdx * nAnchor * (nClass + 5)
+								+ ancIdx * (nClass + 5)
+								+ 5 + clsIdx];
 							if (fCurrScore >= fScore)
 							{
 								nBestClass = clsIdx;
@@ -131,15 +150,15 @@ std::vector<DetectionResult> Detection::GetDetectionResults(float fNMSThres, flo
 						}
 						DetRes.BestClass = nBestClass;
 						DetRes.Score = fScore;
-						vtResult.push_back(DetRes);
+						vtImgResult.push_back(DetRes);
 					}
 				}
 			}
+			DoNMS(vtImgResult, fIOUThres, fScoreThres, nClass);
+
+			vtResult.push_back(vtImgResult);
 		}
 	}
-
-	ApplyScoreThreshold(vtResult, fScoreThres);
-	DoNMS(vtResult, fNMSThres);
 
 	return vtResult;
 }

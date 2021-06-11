@@ -2,6 +2,27 @@
 #include "Segmentation.h"
 #include "Detection.h"
 
+
+using cv::Mat;
+using cv::Vec3f;
+
+Mat BGRToRGB(Mat img)
+{
+	Mat image(img.rows, img.cols, CV_32FC(3));
+	for (int i = 0; i < img.rows; ++i)
+	{
+		Vec3f *p1 = img.ptr<Vec3f>(i);
+		Vec3f *p2 = image.ptr<Vec3f>(i);
+		for (int j = 0; j < img.cols; ++j)
+		{
+			p2[j][2] = p1[j][0];
+			p2[j][1] = p1[j][1];
+			p2[j][0] = p1[j][2];
+		}
+	}
+	return image;
+}
+
 int main()
 {
 	/*
@@ -12,17 +33,17 @@ int main()
 	vtInputOpNames.push_back("serving_default_input_1");
 	vtOutputOpNames.push_back("StatefulPartitionedCall");
 
-	cv::Mat *tt = new cv::Mat();
+	Mat *tt = new Mat();
 
-	cv::Mat Image1 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/01.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image2 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/02.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image3 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/03.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image4 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/04.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image5 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/05.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image6 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/06.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image7 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/07.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image8 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/08.jpeg", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image9 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/09.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image1 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/01.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image2 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/02.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image3 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/03.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image4 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/04.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image5 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/05.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image6 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/06.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image7 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/07.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image8 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/08.jpeg", cv::IMREAD_GRAYSCALE);
+	Mat Image9 = cv::imread("D:/Work/03_WIND2_REVIEW/DATA/Test/0.good/09.jpeg", cv::IMREAD_GRAYSCALE);
 	cv::resize(Image1, Image1, cv::Size(224, 224));
 	cv::resize(Image2, Image2, cv::Size(224, 224));
 	cv::resize(Image3, Image3, cv::Size(224, 224));
@@ -32,15 +53,15 @@ int main()
 	cv::resize(Image7, Image7, cv::Size(224, 224));
 	cv::resize(Image8, Image8, cv::Size(224, 224));
 	cv::resize(Image9, Image9, cv::Size(224, 224));
-	cv::Mat Mat1(224, 224, CV_32FC(1));
-	cv::Mat Mat2(224, 224, CV_32FC(1));
-	cv::Mat Mat3(224, 224, CV_32FC(1));
-	cv::Mat Mat4(224, 224, CV_32FC(1));
-	cv::Mat Mat5(224, 224, CV_32FC(1));
-	cv::Mat Mat6(224, 224, CV_32FC(1));
-	cv::Mat Mat7(224, 224, CV_32FC(1));
-	cv::Mat Mat8(224, 224, CV_32FC(1));
-	cv::Mat Mat9(224, 224, CV_32FC(1));
+	Mat Mat1(224, 224, CV_32FC(1));
+	Mat Mat2(224, 224, CV_32FC(1));
+	Mat Mat3(224, 224, CV_32FC(1));
+	Mat Mat4(224, 224, CV_32FC(1));
+	Mat Mat5(224, 224, CV_32FC(1));
+	Mat Mat6(224, 224, CV_32FC(1));
+	Mat Mat7(224, 224, CV_32FC(1));
+	Mat Mat8(224, 224, CV_32FC(1));
+	Mat Mat9(224, 224, CV_32FC(1));
 	Image1.convertTo(Mat1, CV_32FC(1));
 	Image2.convertTo(Mat2, CV_32FC(1));
 	Image3.convertTo(Mat3, CV_32FC(1));
@@ -127,25 +148,25 @@ int main()
 	vtInputOpNames.push_back("serving_default_input_1");
 	vtOutputOpNames.push_back("StatefulPartitionedCall");
 
-	cv::Mat Image1 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0441.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image2 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0442.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image3 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0443.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image4 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0444.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image5 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0445.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image6 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0446.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image7 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0447.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image8 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0448.png", cv::IMREAD_GRAYSCALE);
-	cv::Mat Image9 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0449.png", cv::IMREAD_GRAYSCALE);
+	Mat Image1 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0441.png", cv::IMREAD_GRAYSCALE);
+	Mat Image2 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0442.png", cv::IMREAD_GRAYSCALE);
+	Mat Image3 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0443.png", cv::IMREAD_GRAYSCALE);
+	Mat Image4 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0444.png", cv::IMREAD_GRAYSCALE);
+	Mat Image5 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0445.png", cv::IMREAD_GRAYSCALE);
+	Mat Image6 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0446.png", cv::IMREAD_GRAYSCALE);
+	Mat Image7 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0447.png", cv::IMREAD_GRAYSCALE);
+	Mat Image8 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0448.png", cv::IMREAD_GRAYSCALE);
+	Mat Image9 = cv::imread("D:/Work/01_TF_C/Data/CornerImage/IMAGE/0449.png", cv::IMREAD_GRAYSCALE);
 
-	cv::Mat Mat1(64, 64, CV_32FC(1));
-	cv::Mat Mat2(64, 64, CV_32FC(1));
-	cv::Mat Mat3(64, 64, CV_32FC(1));
-	cv::Mat Mat4(64, 64, CV_32FC(1));
-	cv::Mat Mat5(64, 64, CV_32FC(1));
-	cv::Mat Mat6(64, 64, CV_32FC(1));
-	cv::Mat Mat7(64, 64, CV_32FC(1));
-	cv::Mat Mat8(64, 64, CV_32FC(1));
-	cv::Mat Mat9(64, 64, CV_32FC(1));
+	Mat Mat1(64, 64, CV_32FC(1));
+	Mat Mat2(64, 64, CV_32FC(1));
+	Mat Mat3(64, 64, CV_32FC(1));
+	Mat Mat4(64, 64, CV_32FC(1));
+	Mat Mat5(64, 64, CV_32FC(1));
+	Mat Mat6(64, 64, CV_32FC(1));
+	Mat Mat7(64, 64, CV_32FC(1));
+	Mat Mat8(64, 64, CV_32FC(1));
+	Mat Mat9(64, 64, CV_32FC(1));
 	Image1.convertTo(Mat1, CV_32FC(1));
 	Image2.convertTo(Mat2, CV_32FC(1));
 	Image3.convertTo(Mat3, CV_32FC(1));
@@ -257,7 +278,7 @@ int main()
 	for (std::vector<float*>::iterator it = vtResult[0].begin(); it != vtResult[0].end(); ++it)
 	{
 		float* imagef = *it;
-		cv::Mat MatImage(64, 64, CV_32FC(1));
+		Mat MatImage(64, 64, CV_32FC(1));
 		std::memcpy(MatImage.data, imagef, 64 * 64 * sizeof(float));
 		cv::imshow("img", MatImage);
 		//cv::imwrite("D:/Work/01_TF_C/99.jpeg", MatImage);
@@ -273,14 +294,18 @@ int main()
 	vtInputOpNames.push_back("serving_default_input_1:0");
 	vtOutputOpNames.push_back("StatefulPartitionedCall:1");
 
-	cv::Mat Image1 = cv::imread("D:/Work/01_TF_C/test/testtest/1focus-1_h3391w5420.bmp", cv::IMREAD_COLOR);
-	cv::Mat Image2 = cv::imread("D:/Work/01_TF_C/test/testtest/1focus-1_h3391w22060.bmp", cv::IMREAD_COLOR);
-	cv::Mat Image3 = cv::imread("D:/Work/01_TF_C/test/testtest/9_h3436w2860.bmp", cv::IMREAD_COLOR);
-	cv::Mat Image4 = cv::imread("D:/Work/01_TF_C/test/testtest/9_h3436w4780.bmp", cv::IMREAD_COLOR);
-	cv::Mat Mat1(640, 640, CV_32FC(3));
-	cv::Mat Mat2(640, 640, CV_32FC(3));
-	cv::Mat Mat3(640, 640, CV_32FC(3));
-	cv::Mat Mat4(640, 640, CV_32FC(3));
+	Mat Image1 = cv::imread("D:/Work/01_TF_C/test/testtest/1focus-1_h3391w5420.bmp", cv::IMREAD_COLOR);
+	Mat Image2 = cv::imread("D:/Work/01_TF_C/test/testtest/1focus-1_h3391w22060.bmp", cv::IMREAD_COLOR);
+	Mat Image3 = cv::imread("D:/Work/01_TF_C/test/testtest/9_h3436w2860.bmp", cv::IMREAD_COLOR);
+	Mat Image4 = cv::imread("D:/Work/01_TF_C/test/testtest/9_h3436w4780.bmp", cv::IMREAD_COLOR);
+	cv::cvtColor(Image1, Image1, cv::COLOR_BGR2RGB);
+	cv::cvtColor(Image2, Image2, cv::COLOR_BGR2RGB);
+	cv::cvtColor(Image3, Image3, cv::COLOR_BGR2RGB);
+	cv::cvtColor(Image4, Image4, cv::COLOR_BGR2RGB);
+	Mat Mat1(640, 640, CV_32FC(3));
+	Mat Mat2(640, 640, CV_32FC(3));
+	Mat Mat3(640, 640, CV_32FC(3));
+	Mat Mat4(640, 640, CV_32FC(3));
 	Image1.convertTo(Mat1, CV_32FC(3));
 	Image2.convertTo(Mat2, CV_32FC(3));
 	Image3.convertTo(Mat3, CV_32FC(3));
@@ -294,6 +319,10 @@ int main()
 	std::memcpy(Image2f, Mat2.data, 640 * 640 * 3 * sizeof(float));
 	std::memcpy(Image3f, Mat3.data, 640 * 640 * 3 * sizeof(float));
 	std::memcpy(Image4f, Mat4.data, 640 * 640 * 3 * sizeof(float));
+	for (int i = 0; i < 640 * 640 * 3; ++i) Image1f[i] = Image1f[i] / 255.;
+	for (int i = 0; i < 640 * 640 * 3; ++i) Image2f[i] = Image2f[i] / 255.;
+	for (int i = 0; i < 640 * 640 * 3; ++i) Image3f[i] = Image3f[i] / 255.;
+	for (int i = 0; i < 640 * 640 * 3; ++i) Image4f[i] = Image4f[i] / 255.;
 	ImageSet[0] = Image1f;
 	ImageSet[1] = Image2f;
 	ImageSet[2] = Image3f;
@@ -301,5 +330,6 @@ int main()
 
 	Det->LoadModel("D:/Work/01_TF_C/test/yolov4-tflite-train_tf-epoch2000", vtInputOpNames, vtOutputOpNames);
 	Det->Run(ImageSet, 2); //ImageData, Batch
-	Det->GetDetectionResults();
+	std::vector<std::vector<DetectionResult>> vtResult;
+	vtResult = Det->GetDetectionResults(0.3, 0.25);
 }
