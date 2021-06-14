@@ -319,17 +319,13 @@ int main()
 	std::memcpy(Image2f, Mat2.data, 640 * 640 * 3 * sizeof(float));
 	std::memcpy(Image3f, Mat3.data, 640 * 640 * 3 * sizeof(float));
 	std::memcpy(Image4f, Mat4.data, 640 * 640 * 3 * sizeof(float));
-	for (int i = 0; i < 640 * 640 * 3; ++i) Image1f[i] = Image1f[i] / 255.;
-	for (int i = 0; i < 640 * 640 * 3; ++i) Image2f[i] = Image2f[i] / 255.;
-	for (int i = 0; i < 640 * 640 * 3; ++i) Image3f[i] = Image3f[i] / 255.;
-	for (int i = 0; i < 640 * 640 * 3; ++i) Image4f[i] = Image4f[i] / 255.;
 	ImageSet[0] = Image1f;
 	ImageSet[1] = Image2f;
 	ImageSet[2] = Image3f;
 	ImageSet[3] = Image4f;
 
 	Det->LoadModel("D:/Work/01_TF_C/test/yolov4-tflite-train_tf-epoch2000", vtInputOpNames, vtOutputOpNames);
-	Det->Run(ImageSet, 2); //ImageData, Batch
+	Det->Run(ImageSet, 2, true); //ImageData, Batch, bNormalize
 	std::vector<std::vector<DetectionResult>> vtResult;
 	vtResult = Det->GetDetectionResults(0.3, 0.25);
 }

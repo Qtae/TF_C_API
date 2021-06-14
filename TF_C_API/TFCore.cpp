@@ -135,11 +135,24 @@ bool TFCore::Run(float*** pImageSet, bool bNormalize)
 	for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 	{
 		float* ImageData = new float[nImage * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]];
-		for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+		if (bNormalize)
 		{
-			for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+			for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
 			{
-				ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = pImageSet[dataIdx][opsIdx][pixIdx];
+				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				{
+					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = pImageSet[dataIdx][opsIdx][pixIdx] / float(255.);
+				}
+			}
+		}
+		else
+		{
+			for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				{
+					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = pImageSet[dataIdx][opsIdx][pixIdx];
+				}
 			}
 		}
 		m_InputDims[opsIdx][0] = static_cast<long long>(nImage);
@@ -209,11 +222,24 @@ bool TFCore::Run(float** pImageSet, bool bNormalize)
 	auto const Deallocator = [](void*, std::size_t, void*) {};
 
 	float* ImageData = new float[nImage * m_InputDims[0][1] * m_InputDims[0][2]];
-	for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+	if (bNormalize)
 	{
-		for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+		for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
 		{
-			ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = pImageSet[dataIdx][pixIdx];
+			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			{
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = pImageSet[dataIdx][pixIdx] / float(255.);
+			}
+		}
+	}
+	else
+	{
+		for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+		{
+			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			{
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = pImageSet[dataIdx][pixIdx];
+			}
 		}
 	}
 	m_InputDims[0][0] = static_cast<long long>(nImage);
@@ -281,11 +307,24 @@ bool TFCore::Run(unsigned char*** pImageSet, bool bNormalize)
 	for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 	{
 		float* ImageData = new float[nImage * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]];
-		for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+		if (bNormalize)
 		{
-			for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+			for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
 			{
-				ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = (float)(pImageSet[dataIdx][opsIdx][pixIdx]);
+				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				{
+					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = pImageSet[dataIdx][opsIdx][pixIdx] / float(255.);
+				}
+			}
+		}
+		else
+		{
+			for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				{
+					ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] + pixIdx] = pImageSet[dataIdx][opsIdx][pixIdx];
+				}
 			}
 		}
 		m_InputDims[opsIdx][0] = static_cast<long long>(nImage);
@@ -356,11 +395,24 @@ bool TFCore::Run(unsigned char** pImageSet, bool bNormalize)
 	auto const Deallocator = [](void*, std::size_t, void*) {};
 
 	float* ImageData = new float[nImage * m_InputDims[0][1] * m_InputDims[0][2]];
-	for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+	if (bNormalize)
 	{
-		for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+		for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
 		{
-			ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = (float)(pImageSet[dataIdx][pixIdx]);
+			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			{
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = (float)(pImageSet[dataIdx][pixIdx]) / (float)(255.);
+			}
+		}
+	}
+	else
+	{
+		for (int dataIdx = 0; dataIdx < nImage; ++dataIdx)
+		{
+			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			{
+				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = (float)(pImageSet[dataIdx][pixIdx]);
+			}
 		}
 	}
 	m_InputDims[0][0] = static_cast<long long>(nImage);
@@ -435,13 +487,29 @@ bool TFCore::Run(float*** pImageSet, int nBatch, bool bNormalize)
 		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 		{
 			float *ImageData = new float[nCurrBatch * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3]];
-			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+			if (bNormalize)
 			{
-				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 				{
-					for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
+					for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
 					{
-						ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx];
+						for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
+						{
+							ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx] / float(255.);
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+				{
+					for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+					{
+						for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
+						{
+							ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx];
+						}
 					}
 				}
 			}
@@ -521,13 +589,29 @@ bool TFCore::Run(float** pImageSet, int nBatch, bool bNormalize)
 			nCurrBatch = nImage % nBatch;
 
 		float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3]];
-		for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+		if (bNormalize)
 		{
-			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2] ; ++pixIdx)
+			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 			{
-				for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
+				for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
 				{
-					ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx];
+					for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
+					{
+						ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx] / float(255.);
+					}
+				}
+			}
+		}
+		else
+		{
+			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+				{
+					for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
+					{
+						ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx];
+					}
 				}
 			}
 		}
@@ -603,13 +687,29 @@ bool TFCore::Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
 		for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
 		{
 			float *ImageData = new float[nCurrBatch * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3]];
-			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+			if (bNormalize)
 			{
-				for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 				{
-					for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
+					for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
 					{
-						ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx]);
+						for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
+						{
+							ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx]) / (float)(255.);
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+				{
+					for (int pixIdx = 0; pixIdx < m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2]; ++pixIdx)
+					{
+						for (int chnIdx = 0; chnIdx < m_InputDims[opsIdx][3]; ++chnIdx)
+						{
+							ImageData[dataIdx * m_InputDims[opsIdx][1] * m_InputDims[opsIdx][2] * m_InputDims[opsIdx][3] + pixIdx * m_InputDims[opsIdx][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * m_InputDims[opsIdx][3] + chnIdx]);
+						}
 					}
 				}
 			}
@@ -689,13 +789,29 @@ bool TFCore::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
 			nCurrBatch = nImage % nBatch;
 
 		float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3]];
-		for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+		if (bNormalize)
 		{
-			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 			{
-				for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
+				for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
 				{
-					ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx]);
+					for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
+					{
+						ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx]) / (float)(255.);
+					}
+				}
+			}
+		}
+		else
+		{
+			for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+				{
+					for (int chnIdx = 0; chnIdx < m_InputDims[0][3]; ++chnIdx)
+					{
+						ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] * m_InputDims[0][3] + pixIdx * m_InputDims[0][3] + chnIdx] = (float)(pImageSet[batchIdx * nBatch + dataIdx][pixIdx * m_InputDims[0][3] + chnIdx]);
+					}
 				}
 			}
 		}
@@ -761,28 +877,54 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSiz
 	int nImageChannel = (int)(m_InputDims[0][3]);
 
 	float** pImageSet = new float*[nImage];
-	for (int yIdx = 0; yIdx < nIterY; ++yIdx)
+	if (bNormalize)
 	{
-		if(nCurrIterY + yIdx > ptImageSize.y) nCurrIterY = ptImageSize.y - yIdx;
-		for (int xIdx = 0; xIdx < nIterX; ++xIdx)
+		for (int yIdx = 0; yIdx < nIterY; ++yIdx)
 		{
-			if (nCurrIterX + xIdx > ptImageSize.x) nCurrIterX = ptImageSize.x - xIdx;
-			float* pCropImage = new float[ptCropSize.x * ptCropSize.y * nImageChannel];
-			for (int y = 0; y < ptCropSize.y; ++y)
+			if (nCurrIterY + yIdx > ptImageSize.y) nCurrIterY = ptImageSize.y - yIdx;
+			for (int xIdx = 0; xIdx < nIterX; ++xIdx)
 			{
-				for (int x = 0; x < ptCropSize.x; ++x)
+				if (nCurrIterX + xIdx > ptImageSize.x) nCurrIterX = ptImageSize.x - xIdx;
+				float* pCropImage = new float[ptCropSize.x * ptCropSize.y * nImageChannel];
+				for (int y = 0; y < ptCropSize.y; ++y)
 				{
-					for (int c = 0; c < nImageChannel; ++c)
+					for (int x = 0; x < ptCropSize.x; ++x)
 					{
-						//suppose that ATI programs using same channel convention with 1ch.(channel info is in 2nd iteration)
-						pCropImage[y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[nCurrIterY + y][nCurrIterX + x * nImageChannel + c]);
+						for (int c = 0; c < nImageChannel; ++c)
+						{
+							//suppose that ATI programs using same channel convention with 1ch.(channel info is in 2nd iteration)
+							pCropImage[y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[nCurrIterY + y][nCurrIterX + x * nImageChannel + c]) / float(255.);
+						}
 					}
 				}
+				pImageSet[yIdx * nIterX + xIdx] = pCropImage;
 			}
-			pImageSet[yIdx * nIterX + xIdx] = pCropImage;
 		}
 	}
-
+	else
+	{
+		for (int yIdx = 0; yIdx < nIterY; ++yIdx)
+		{
+			if (nCurrIterY + yIdx > ptImageSize.y) nCurrIterY = ptImageSize.y - yIdx;
+			for (int xIdx = 0; xIdx < nIterX; ++xIdx)
+			{
+				if (nCurrIterX + xIdx > ptImageSize.x) nCurrIterX = ptImageSize.x - xIdx;
+				float* pCropImage = new float[ptCropSize.x * ptCropSize.y * nImageChannel];
+				for (int y = 0; y < ptCropSize.y; ++y)
+				{
+					for (int x = 0; x < ptCropSize.x; ++x)
+					{
+						for (int c = 0; c < nImageChannel; ++c)
+						{
+							//suppose that ATI programs using same channel convention with 1ch.(channel info is in 2nd iteration)
+							pCropImage[y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[nCurrIterY + y][nCurrIterX + x * nImageChannel + c]);
+						}
+					}
+				}
+				pImageSet[yIdx * nIterX + xIdx] = pCropImage;
+			}
+		}
+	}
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 

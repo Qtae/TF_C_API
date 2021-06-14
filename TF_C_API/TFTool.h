@@ -11,24 +11,19 @@ namespace TFTool
 		const char* ModelName;
 		std::vector<const char*> vtInputOpNames;
 		std::vector<const char*> vtOutputOpNames;
-
 	}ModelInfo;
 
-	bool LoadModel(const char*, std::vector<const char*>&, std::vector<const char*>&);
+	bool LoadModel(const char*, std::vector<const char*>&, std::vector<const char*>&, int);
 
 	bool Run(float**, bool bNormalize = false);
 	bool Run(float***, bool bNormalize = false);
 	bool Run(unsigned char**, bool bNormalize = false);
 	bool Run(unsigned char***, bool bNormalize = false);
-	bool Run(std::vector<std::vector<cv::Mat>>, bool bNormalize = false);
-	bool Run(std::vector<cv::Mat>, bool bNormalize = false);
 
 	bool Run(float***, int, bool bNormalize = false);
 	bool Run(float**, int, bool bNormalize = false);
 	bool Run(unsigned char***, int, bool bNormalize = false);
 	bool Run(unsigned char**, int, bool bNormalize = false);
-	bool Run(std::vector<std::vector<cv::Mat>>, int, bool bNormalize = false);
-	bool Run(std::vector<cv::Mat>, int, bool bNormalize = false);
 
 	//VisionWorks image input format, has only one input operator
 	bool Run(unsigned char**, CPoint, CPoint, int, bool bNormalize = false); std::vector<std::vector<std::vector<float>>> GetOutput();
