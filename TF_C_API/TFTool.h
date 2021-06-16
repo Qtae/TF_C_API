@@ -1,38 +1,112 @@
 #pragma once
-#include "Classification.h"
-#include "Segmentation.h"
-#include "Detection.h"
+#include <atltypes.h>
+#include <vector>
+
+
+struct DetectionResult;
 
 namespace TFTool
 {
-	typedef struct ModelInfo
-	{
-		int nModelType;
-		const char* ModelName;
-		std::vector<const char*> vtInputOpNames;
-		std::vector<const char*> vtOutputOpNames;
-	}ModelInfo;
+	//Load Saved Model Format Directory
+	//	ModelPath : 
+	//	vtInputOpNames : Vector of input names
+	//					 (Format : {input operation name}:{index} )
+	//	vtOutputOpNames : Vector of output names
+	//					 (Format : {output operation name}:{index} )
+	//	nTaskType : Task type
+	//		0 : Classification
+	//		1 : Segmentation
+	//		2 : Detection
+	__declspec(dllexport) bool LoadModel(const char* ModelPath,
+		std::vector<const char*> &vtInputOpNames, std::vector<const char*>& vtOutputOpNames,
+		int nTaskType);
 
-	bool LoadModel(const char*, std::vector<const char*>&, std::vector<const char*>&, int);
+	//Run Session
+	//	pImageSet[j][k] : Array of input image(Float)
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(float** pImageSet, bool bNormalize = false);
 
-	bool Run(float**, bool bNormalize = false);
-	bool Run(float***, bool bNormalize = false);
-	bool Run(unsigned char**, bool bNormalize = false);
-	bool Run(unsigned char***, bool bNormalize = false);
+	//Run Session
+	//	pImageSet[i][j][k] : Array of input image(Float)
+	//		i : input operator index
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(float*** pImageSet, bool bNormalize = false);
 
-	bool Run(float***, int, bool bNormalize = false);
-	bool Run(float**, int, bool bNormalize = false);
-	bool Run(unsigned char***, int, bool bNormalize = false);
-	bool Run(unsigned char**, int, bool bNormalize = false);
+	//Run Session
+	//	pImageSet[j][k] : Array of input image(Byte)
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(unsigned char** pImageSet, bool bNormalize = false);
 
-	//VisionWorks image input format, has only one input operator
-	bool Run(unsigned char**, CPoint, CPoint, int, bool bNormalize = false); std::vector<std::vector<std::vector<float>>> GetOutput();
+	//Run Session
+	//	pImageSet[i][j][k] : Array of input image(Byte)
+	//		i : input operator index
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(unsigned char*** pImageSet, bool bNormalize = false);
+
+	//Run Session
+	//	pImageSet[i][j][k] : Array of input image(Float)
+	//		i : input operator index
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	nBatch : Image batch size
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(float*** pImageSet, int nBatch, bool bNormalize = false);
+
+	//Run Session
+	//	pImageSet[j][k] : Array of input image(Float)
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	nBatch : Image batch size
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(float** pImageSet, int nBatch, bool bNormalize = false);
+
+	//Run Session
+	//	pImageSet[i][j][k] : Array of input image(Byte)
+	//		i : input operator index
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	nBatch : Image batch size
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(unsigned char*** pImageSet, int nBatch, bool bNormalize = false);
+
+	//Run Session
+	//	pImageSet[j][k] : Array of input image(Byte)
+	//		j : image index
+	//		k : pixel index (x, y, channel)
+	//	nBatch : Image batch size
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(unsigned char** pImageSet, int nBatch, bool bNormalize = false);
+
+	//Run Session
+	//	pImageSet :Image Byte Array
+	//	ptCropSize : Crop size
+	//	ptOverlapSize : Overlap size
+	//	nBatch : Image batch size
+	//	bNormalize : Divide pixel value by 255 when true.
+	__declspec(dllexport) bool Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSize,
+		int nBatch, bool bNormalize = false);
 	
-	bool FreeModel();
+	//Free memory
+	__declspec(dllexport) bool FreeModel();
 
-	std::vector<std::vector<float>> GetOutputByOpIndex(int nOutputOpIndex = 0);
-	std::vector<std::vector<int>> GetPredCls(float);
-	std::vector<int> GetPredClsByOpIndex(float, int nOutputOpIndex = 0);
-	void GetPredClsAndSftmx(std::vector<std::vector<int>>&, std::vector<std::vector<float>>&, float);
-	void GetPredClsAndSftmxByOpIndex(std::vector<int>&, std::vector<float>&, float, int nOutputOpIndex = 0);
+	//Returns classification result
+	__declspec(dllexport) std::vector<std::vector<std::vector<float>>> GetClassificationResults();
+
+	//Returns classification result
+	__declspec(dllexport) std::vector<std::vector<int>> GetClassificationResults(float fSoftmxThresh = 0);
+
+	//Returns segmentation result
+	__declspec(dllexport) std::vector<std::vector<float*>> GetSegmentationResults();
+
+	//Returns detection result
+	__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
+
 }
