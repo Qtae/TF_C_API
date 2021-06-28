@@ -13,21 +13,21 @@ namespace TFTool
 	{
 	public:
 		//Constructor of AI Instance.
-		AI();
+		__declspec(dllexport) AI();
 
 		//Destructor
-		~AI();
+		__declspec(dllexport) ~AI();
 
 		//Load Saved Model Format Directory
-	//	ModelPath : 
-	//	vtInputOpNames : Vector of input names
-	//					 (Format : {input operation name}:{index} )
-	//	vtOutputOpNames : Vector of output names
-	//					 (Format : {output operation name}:{index} )
-	//	nTaskType : Task type
-	//		0 : Classification
-	//		1 : Segmentation
-	//		2 : Detection
+		//	ModelPath : 
+		//	vtInputOpNames : Vector of input names
+		//					 (Format : {input operation name}:{index} )
+		//	vtOutputOpNames : Vector of output names
+		//					 (Format : {output operation name}:{index} )
+		//	nTaskType : Task type
+		//		0 : Classification
+		//		1 : Segmentation
+		//		2 : Detection
 		__declspec(dllexport) bool LoadModel(const char* ModelPath,
 			std::vector<const char*> &vtInputOpNames, std::vector<const char*>& vtOutputOpNames,
 			int nTaskType);
