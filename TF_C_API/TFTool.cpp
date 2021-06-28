@@ -1,4 +1,5 @@
 #pragma once
+#include <atltypes.h>
 #include "TFTool.h"
 #include "Classification.h"
 #include "Segmentation.h"
@@ -7,12 +8,20 @@
 
 namespace TFTool
 {
-	int m_nTaskType = -1;
-	Classification* pClassification = new Classification();
-	Segmentation* pSegmentation = new Segmentation();
-	Detection* pDetection = new Detection();
+	AI::AI()
+	{
+		m_nTaskType = -1;
+		pClassification = new Classification();
+		pSegmentation = new Segmentation();
+		pDetection = new Detection();
+	}
 
-	bool LoadModel(const char* ModelPath, std::vector<const char*> &vtInputOpNames, std::vector<const char*>& vtOutputOpNames, int nTaskType)
+	AI::~AI()
+	{
+
+	}
+
+	bool AI::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputOpNames, std::vector<const char*>& vtOutputOpNames, int nTaskType)
 	{
 		m_nTaskType = nTaskType;
 		bool bRes = false;
@@ -31,7 +40,7 @@ namespace TFTool
 		return bRes;
 	}
 
-	bool Run(float** pImageSet, bool bNormalize)
+	bool AI::Run(float** pImageSet, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -49,7 +58,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(float*** pImageSet, bool bNormalize)
+	bool AI::Run(float*** pImageSet, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -67,7 +76,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(unsigned char** pImageSet, bool bNormalize)
+	bool AI::Run(unsigned char** pImageSet, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -85,7 +94,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(unsigned char*** pImageSet, bool bNormalize)
+	bool AI::Run(unsigned char*** pImageSet, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -103,7 +112,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(float*** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(float*** pImageSet, int nBatch, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -121,7 +130,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(float** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(float** pImageSet, int nBatch, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -139,7 +148,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -157,7 +166,7 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -175,25 +184,25 @@ namespace TFTool
 		return true;
 	}
 
-	bool Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSize, int nBatch, bool bNormalize)
+	bool AI::Run(unsigned char** ppImage, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBatch, bool bNormalize)
 	{
 		bool bRes;
 		switch (m_nTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(ppImage, ptCropSize, ptOverlapSize, nBatch, bNormalize);
+			bRes = pClassification->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(ppImage, ptCropSize, ptOverlapSize, nBatch, bNormalize);
+			pSegmentation->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(ppImage, ptCropSize, ptOverlapSize, nBatch, bNormalize);
+			pDetection->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
 			break;
 		}
 		return true;
 	}
 
-	bool FreeModel()
+	bool AI::FreeModel()
 	{
 		bool bRes;
 		switch (m_nTaskType)
@@ -211,7 +220,7 @@ namespace TFTool
 		return true;
 	}
 
-	std::vector<std::vector<std::vector<float>>> GetClassificationResults()
+	std::vector<std::vector<std::vector<float>>> AI::GetClassificationResults()
 	{
 		std::vector<std::vector<std::vector<float>>> vtResult;
 		if (m_nTaskType != 0) 
@@ -223,7 +232,7 @@ namespace TFTool
 		}
 	}
 
-	std::vector<std::vector<int>> GetClassificationResults(float fSoftmxThresh)
+	std::vector<std::vector<int>> AI::GetClassificationResults(float fSoftmxThresh)
 	{
 		std::vector<std::vector<int>> vtResult;
 		if (m_nTaskType != 0)
@@ -235,7 +244,7 @@ namespace TFTool
 		}
 	}
 
-	std::vector<std::vector<float*>> GetSegmentationResults()
+	std::vector<std::vector<float*>> AI::GetSegmentationResults()
 	{
 		std::vector<std::vector<float*>> vtResult;
 		if (m_nTaskType != 1)
@@ -247,7 +256,7 @@ namespace TFTool
 		}
 	}
 
-	std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres, float fScoreThres)
+	std::vector<std::vector<DetectionResult>> AI::GetDetectionResults(float fIOUThres, float fScoreThres)
 	{
 		std::vector<std::vector<DetectionResult>> vtResult;
 		if (m_nTaskType != 2)

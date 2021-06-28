@@ -1,4 +1,5 @@
-﻿#include "Classification.h"
+﻿#pragma once
+#include "Classification.h"
 
 
 Classification::Classification()

@@ -2,17 +2,6 @@
 #include "TFCore.h"
 
 
-struct DetectionResult
-{
-	int x;
-	int y;
-	int w;
-	int h;
-	float Objectness;
-	int BestClass;
-	float Score;
-};
-
 class Detection : public TFCore
 {
 public:

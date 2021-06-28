@@ -1,3 +1,4 @@
+#pragma once
 #include "Classification.h"
 #include "Segmentation.h"
 #include "Detection.h"

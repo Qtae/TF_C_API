@@ -1,3 +1,4 @@
+#pragma once
 #include "Detection.h"
 
 Detection::Detection()

@@ -9,7 +9,7 @@
 #include <tensorflow/c/c_api.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
-#include "pch.h"
+#include "TFResultStructure.h"
 
 
 class TFCore
