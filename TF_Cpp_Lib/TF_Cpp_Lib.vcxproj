@@ -22,9 +22,9 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9E6A7F2C-EA9D-4DAB-8960-2915953C3430}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TF_C_API</RootNamespace>
+    <RootNamespace>TF_Cpp_Lib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <ProjectName>TF_C_API</ProjectName>
+    <ProjectName>TF_Cpp_Lib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
