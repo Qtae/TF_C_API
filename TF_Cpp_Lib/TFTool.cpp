@@ -42,182 +42,182 @@ namespace TFTool
 
 	bool AI::Run(float** pImageSet, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, bNormalize);
+			bRes = pDetection->Run(pImageSet, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(float*** pImageSet, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, bNormalize);
+			bRes = pDetection->Run(pImageSet, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(unsigned char** pImageSet, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, bNormalize);
+			bRes = pDetection->Run(pImageSet, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(unsigned char*** pImageSet, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, bNormalize);
+			bRes = pDetection->Run(pImageSet, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(float*** pImageSet, int nBatch, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(float** pImageSet, int nBatch, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::Run(unsigned char** ppImage, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBatch, bool bNormalize)
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
 			break;
 		case 1://segmentation
-			pSegmentation->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
+			bRes = pSegmentation->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
 			break;
 		case 2://detection
-			pDetection->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
+			bRes = pDetection->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	bool AI::FreeModel()
 	{
-		bool bRes;
+		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
 			bRes = pClassification->FreeModel();
 			break;
 		case 1://segmentation
-			pSegmentation->FreeModel();
+			bRes = pSegmentation->FreeModel();
 			break;
 		case 2://detection
-			pDetection->FreeModel();
+			bRes = pDetection->FreeModel();
 			break;
 		}
-		return true;
+		return bRes;
 	}
 
 	std::vector<std::vector<std::vector<float>>> AI::GetClassificationResults()
