@@ -120,6 +120,13 @@ namespace TFTool
 		//Returns detection result
 		__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
 
+		//Returns true when model is loaded
+		__declspec(dllexport) bool IsModelLoaded();
+
+		__declspec(dllexport) long long** GetInputDims();
+
+		__declspec(dllexport) long long** GetOutputDims();
+
 	private:
 		int m_nTaskType = -1;
 

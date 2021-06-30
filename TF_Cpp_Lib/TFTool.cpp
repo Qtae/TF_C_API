@@ -268,4 +268,57 @@ namespace TFTool
 		}
 	}
 
+	bool AI::IsModelLoaded()
+	{
+		bool bRes = false;
+		switch (m_nTaskType)
+		{
+		case 0://classification
+			bRes = pClassification->IsModelLoaded();
+			break;
+		case 1://segmentation
+			bRes = pSegmentation->IsModelLoaded();
+			break;
+		case 2://detection
+			bRes = pDetection->IsModelLoaded();
+			break;
+		}
+		return bRes;
+	}
+
+	long long** AI::GetInputDims()
+	{
+		long long** pDims = NULL;
+		switch (m_nTaskType)
+		{
+		case 0://classification
+			pDims = pClassification->GetInputDims();
+			break;
+		case 1://segmentation
+			pDims = pSegmentation->GetInputDims();
+			break;
+		case 2://detection
+			pDims = pDetection->GetInputDims();
+			break;
+		}
+		return pDims;
+	}
+
+	long long** AI::GetOutputDims()
+	{
+		long long** pDims = NULL;
+		switch (m_nTaskType)
+		{
+		case 0://classification
+			pDims = pClassification->GetOutputDims();
+			break;
+		case 1://segmentation
+			pDims = pSegmentation->GetOutputDims();
+			break;
+		case 2://detection
+			pDims = pDetection->GetOutputDims();
+			break;
+		}
+		return pDims;
+	}
 }

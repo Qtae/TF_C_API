@@ -40,6 +40,11 @@ public:
 
 	bool FreeModel();
 
+	bool IsModelLoaded();
+
+	long long** GetInputDims();
+	long long** GetOutputDims();
+
 private:
 	bool _Run();
 

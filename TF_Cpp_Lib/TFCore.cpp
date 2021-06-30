@@ -1032,6 +1032,21 @@ bool TFCore::FreeModel()
 	return true;
 }
 
+bool TFCore::IsModelLoaded()
+{
+	return m_bModelLoaded;
+}
+
+long long** TFCore::GetInputDims()
+{
+	return m_InputDims;
+}
+
+long long** TFCore::GetOutputDims()
+{
+	return m_OutputDims;
+}
+
 bool TFCore::_Run()
 {
 	return true;
