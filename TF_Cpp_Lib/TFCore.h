@@ -75,4 +75,8 @@ protected:
 	std::size_t* m_OutputDataSizePerBatch;
 
 	std::vector<std::vector<TF_Tensor*>> m_vtOutputTensors;
+
+	CPoint m_ptImageSize;
+	CPoint m_ptCropSize;
+	CPoint m_ptOverlapSize;
 };

@@ -120,11 +120,14 @@ namespace TFTool
 		//Returns detection result
 		__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
 
+		//Return whole image (cropped on run() function) detection result
+		__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetWholeImageDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
+
 		//Returns true when model is loaded
 		__declspec(dllexport) bool IsModelLoaded();
 
+		//Returns input/output dimensions
 		__declspec(dllexport) long long** GetInputDims();
-
 		__declspec(dllexport) long long** GetOutputDims();
 
 	private:

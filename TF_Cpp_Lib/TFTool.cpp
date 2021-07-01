@@ -268,6 +268,18 @@ namespace TFTool
 		}
 	}
 
+	std::vector<std::vector<DetectionResult>> AI::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
+	{
+		std::vector<std::vector<DetectionResult>> vtResult;
+		if (m_nTaskType != 2)
+			return vtResult;
+		else
+		{
+			vtResult = pDetection->GetDetectionResults(fIOUThres, fScoreThres);
+			return vtResult;
+		}
+	}
+
 	bool AI::IsModelLoaded()
 	{
 		bool bRes = false;

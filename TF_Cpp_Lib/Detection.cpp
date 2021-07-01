@@ -109,31 +109,129 @@ std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float f
 					for (int ancIdx = 0; ancIdx < nAnchor; ++ancIdx)
 					{
 						DetectionResult DetRes;
-						DetRes.x = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-							+ grdYIdx * nAnchor * (nClass + 5)
-							+ ancIdx * (nClass + 5)
-							+ 0];
-						DetRes.y = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-							+ grdYIdx * nAnchor * (nClass + 5)
-							+ ancIdx * (nClass + 5)
-							+ 1];
-						DetRes.w = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-							+ grdYIdx * nAnchor * (nClass + 5)
-							+ ancIdx * (nClass + 5)
-							+ 2];
-						DetRes.h = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-							+ grdYIdx * nAnchor * (nClass + 5)
-							+ ancIdx * (nClass + 5)
-							+ 3];
-						DetRes.Objectness = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-							+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-							+ grdYIdx * nAnchor * (nClass + 5)
-							+ ancIdx * (nClass + 5)
-							+ 4];
+						DetRes.x = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   0];
+						DetRes.y = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   1];
+						DetRes.w = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   2];
+						DetRes.h = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   3];
+						DetRes.Objectness = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+												   grdXIdx * nGridY * nAnchor * (nClass + 5) +
+												   grdYIdx * nAnchor * (nClass + 5) +
+												   ancIdx * (nClass + 5) +
+												   4];
+						int nBestClass = -1;
+						float fScore = 0.;
+						for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+						{
+							float fCurrScore = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
+								+ grdXIdx * nGridY * nAnchor * (nClass + 5)
+								+ grdYIdx * nAnchor * (nClass + 5)
+								+ ancIdx * (nClass + 5)
+								+ 5 + clsIdx];
+							if (fCurrScore >= fScore)
+							{
+								nBestClass = clsIdx;
+								fScore = fCurrScore;
+							}
+						}
+						DetRes.BestClass = nBestClass;
+						DetRes.Score = fScore;
+						vtImgResult.push_back(DetRes);
+					}
+				}
+			}
+			DoNMS(vtImgResult, fIOUThres, fScoreThres, nClass);
+
+			vtResult.push_back(vtImgResult);
+		}
+	}
+
+	return vtResult;
+}
+
+std::vector<std::vector<DetectionResult>> Detection::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
+{
+	//Suppose there is only one output operation in detection tasks.
+	std::vector<std::vector<DetectionResult>> vtResult;
+	int nBatch = (int)m_OutputDims[0][0];
+	int nGridX = (int)m_OutputDims[0][1];
+	int nGridY = (int)m_OutputDims[0][2];
+	int nAnchor = (int)m_OutputDims[0][3];
+	int nClass = (int)m_OutputDims[0][4] - 5;
+
+	int nIterX = (int)(m_ptImageSize.x / (m_ptCropSize.x - m_ptOverlapSize.x));
+	int nIterY = (int)(m_ptImageSize.y / (m_ptCropSize.y - m_ptOverlapSize.y));
+	if (m_ptImageSize.x - ((m_ptCropSize.x - m_ptOverlapSize.x) * (nIterX - 1)) > m_ptCropSize.x) ++nIterX;
+	if (m_ptImageSize.y - ((m_ptCropSize.y - m_ptOverlapSize.y) * (nIterY - 1)) > m_ptCropSize.y) ++nIterY;
+	int nCurrXIdx = 0;
+	int nCurrYIdx = 0;
+	int nCurrImgIdx = 0;
+
+	for (int i = 0; i < m_vtOutputTensors[0].size(); ++i)//Tensor iteration
+	{
+		float *output = new float[nBatch * nGridX * nGridY * nAnchor * (nClass + 5)];
+		std::memcpy(output, TF_TensorData(m_vtOutputTensors[0][i]), nBatch * nGridX * nGridY * nAnchor * (nClass + 5) * sizeof(float));
+
+		for (int imgIdx = 0; imgIdx < nBatch; ++imgIdx)//Image in tensor iteration
+		{
+			nCurrImgIdx = i * nBatch + imgIdx;
+			nCurrXIdx = nCurrImgIdx % nIterX;
+			nCurrYIdx = nCurrImgIdx / nIterX;
+			std::vector<DetectionResult> vtImgResult;
+			for (int grdXIdx = 0; grdXIdx < nGridX; ++grdXIdx)
+			{
+				for (int grdYIdx = 0; grdYIdx < nGridY; ++grdYIdx)
+				{
+					for (int ancIdx = 0; ancIdx < nAnchor; ++ancIdx)
+					{
+						int nXOffset = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
+						int nYOffset = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
+						if (nXOffset > m_ptImageSize.x) nXOffset = m_ptImageSize.x - m_ptCropSize.x;
+						if (nYOffset > m_ptImageSize.y) nYOffset = m_ptImageSize.y - m_ptCropSize.y;
+
+						DetectionResult DetRes;
+						DetRes.x = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   0] + 
+								   nXOffset;
+						DetRes.y = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   1] +
+								   nYOffset;
+						DetRes.w = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   2];
+						DetRes.h = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
+											   grdYIdx * nAnchor * (nClass + 5) + 
+											   ancIdx * (nClass + 5) + 
+											   3];
+						DetRes.Objectness = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
+												   grdXIdx * nGridY * nAnchor * (nClass + 5) +
+												   grdYIdx * nAnchor * (nClass + 5) +
+												   ancIdx * (nClass + 5) +
+												   4];
 						int nBestClass = -1;
 						float fScore = 0.;
 						for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
