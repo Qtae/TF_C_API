@@ -164,10 +164,10 @@ std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float f
 	return vtResult;
 }
 
-std::vector<std::vector<DetectionResult>> Detection::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
+std::vector<DetectionResult> Detection::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
 {
 	//Suppose there is only one output operation in detection tasks.
-	std::vector<std::vector<DetectionResult>> vtResult;
+	std::vector<DetectionResult> vtResult;
 	int nBatch = (int)m_OutputDims[0][0];
 	int nGridX = (int)m_OutputDims[0][1];
 	int nGridY = (int)m_OutputDims[0][2];
@@ -192,7 +192,6 @@ std::vector<std::vector<DetectionResult>> Detection::GetWholeImageDetectionResul
 			nCurrImgIdx = i * nBatch + imgIdx;
 			nCurrXIdx = nCurrImgIdx % nIterX;
 			nCurrYIdx = nCurrImgIdx / nIterX;
-			std::vector<DetectionResult> vtImgResult;
 			for (int grdXIdx = 0; grdXIdx < nGridX; ++grdXIdx)
 			{
 				for (int grdYIdx = 0; grdYIdx < nGridY; ++grdYIdx)
@@ -249,15 +248,14 @@ std::vector<std::vector<DetectionResult>> Detection::GetWholeImageDetectionResul
 						}
 						DetRes.BestClass = nBestClass;
 						DetRes.Score = fScore;
-						vtImgResult.push_back(DetRes);
+						vtResult.push_back(DetRes);
 					}
 				}
 			}
-			DoNMS(vtImgResult, fIOUThres, fScoreThres, nClass);
-
-			vtResult.push_back(vtImgResult);
 		}
 	}
+
+	DoNMS(vtResult, fIOUThres, fScoreThres, nClass);
 
 	return vtResult;
 }

@@ -268,14 +268,14 @@ namespace TFTool
 		}
 	}
 
-	std::vector<std::vector<DetectionResult>> AI::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
+	std::vector<DetectionResult> AI::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
 	{
-		std::vector<std::vector<DetectionResult>> vtResult;
+		std::vector<DetectionResult> vtResult;
 		if (m_nTaskType != 2)
 			return vtResult;
 		else
 		{
-			vtResult = pDetection->GetDetectionResults(fIOUThres, fScoreThres);
+			vtResult = pDetection->GetWholeImageDetectionResults(fIOUThres, fScoreThres);
 			return vtResult;
 		}
 	}
