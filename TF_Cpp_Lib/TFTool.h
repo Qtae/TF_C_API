@@ -65,6 +65,17 @@ namespace TFTool
 		__declspec(dllexport) bool Run(unsigned char*** pImageSet, bool bNormalize = false);
 
 		//Run Session
+		//	pImageSet :Image Byte Array
+		//	nImageSizeX, nImageSizeY : Image size
+		//	nCropSizeX, nCropSizeY : Crop size
+		//	nOverlapSizeX, nOverlapSizeY : Overlap size
+		//	bNormalize : Divide pixel value by 255 when true.
+		//	bConvertGrayToColor : Convert Grayscale input image to color image.
+		__declspec(dllexport) bool Run(unsigned char** ppImage, int nImageSizeX, int nImageSizeY,
+			int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBuffPosX, int nBuffPosY,
+			bool bNormalize = false, bool bConvertGrayToColor = false);
+
+		//Run Session
 		//	pImageSet[i][j][k] : Array of input image(Float)
 		//		i : input operator index
 		//		j : image index

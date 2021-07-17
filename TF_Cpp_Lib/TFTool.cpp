@@ -112,6 +112,24 @@ namespace TFTool
 		return bRes;
 	}
 
+	bool AI::Run(unsigned char** ppImage, int nImageSizeX, int nImageSizeY, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBuffPosX, int nBuffPosY, bool bNormalize, bool bConvertGrayToColor)
+	{
+		bool bRes = false;
+		switch (m_nTaskType)
+		{
+		case 0://classification
+			bRes = pClassification->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), bNormalize, bConvertGrayToColor);
+			break;
+		case 1://segmentation
+			bRes = pSegmentation->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), bNormalize, bConvertGrayToColor);
+			break;
+		case 2://detection
+			bRes = pDetection->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), bNormalize, bConvertGrayToColor);
+			break;
+		}
+		return bRes;
+	}
+
 	bool AI::Run(float*** pImageSet, int nBatch, bool bNormalize)
 	{
 		bool bRes = false;

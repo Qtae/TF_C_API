@@ -262,5 +262,15 @@ bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& n
 	{
 		arrDetRes[i] = vtResult[i];
 	}
+
+	for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
+	{
+		for (int tensorIdx = 0; tensorIdx < m_vtOutputTensors[opsIdx].size(); ++tensorIdx)
+		{
+			TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
+		}
+	}
+	m_vtOutputTensors.clear();
+
 	return true;
 }

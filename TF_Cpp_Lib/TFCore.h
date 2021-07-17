@@ -28,6 +28,9 @@ public:
 	bool Run(std::vector<std::vector<cv::Mat>>, bool bNormalize = false);
 	bool Run(std::vector<cv::Mat>, bool bNormalize = false);
 
+	//VisionWorks image input format, has only one input operator
+	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, bool bNormalize = false, bool bConvertGrayToColor = false);
+
 	bool Run(float***, int, bool bNormalize = false);
 	bool Run(float**, int, bool bNormalize = false);
 	bool Run(unsigned char***, int, bool bNormalize = false);
