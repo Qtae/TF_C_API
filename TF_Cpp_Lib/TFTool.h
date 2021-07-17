@@ -7,6 +7,8 @@ class Classification;
 class Segmentation;
 class Detection;
 
+template class __declspec(dllexport) std::vector<DetectionResult>;
+
 namespace TFTool
 {
 	class AI
@@ -98,12 +100,15 @@ namespace TFTool
 
 		//Run Session
 		//	pImageSet :Image Byte Array
+		//	nImageSizeX, nImageSizeY : Image size
 		//	nCropSizeX, nCropSizeY : Crop size
 		//	nOverlapSizeX, nOverlapSizeY : Overlap size
 		//	nBatch : Image batch size
 		//	bNormalize : Divide pixel value by 255 when true.
-		__declspec(dllexport) bool Run(unsigned char** ppImage, int nCropSizeX, int nCropSizeY,
-			int nOverlapSizeX, int nOverlapSizeY, int nBatch, bool bNormalize = false);
+		//	bConvertGrayToColor : Convert Grayscale input image to color image.
+		__declspec(dllexport) bool Run(unsigned char** ppImage, int nImageSizeX, int nImageSizeY,
+			int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBuffPosX, int nBuffPosY,
+			int nBatch, bool bNormalize = false, bool bConvertGrayToColor = false);
 
 		//Free memory
 		__declspec(dllexport) bool FreeModel();
@@ -121,7 +126,7 @@ namespace TFTool
 		__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
 
 		//Return whole image (cropped on run() function) detection result
-		__declspec(dllexport) std::vector<DetectionResult> GetWholeImageDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
+		__declspec(dllexport) bool GetWholeImageDetectionResults(DetectionResult*, int&, float fIOUThres = 0.5, float fScoreThres = 0.25);
 
 		//Returns true when model is loaded
 		__declspec(dllexport) bool IsModelLoaded();

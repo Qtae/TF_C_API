@@ -184,19 +184,19 @@ namespace TFTool
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char** ppImage, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBatch, bool bNormalize)
+	bool AI::Run(unsigned char** ppImage, int nImageSizeX, int nImageSizeY, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBuffPosX, int nBuffPosY, int nBatch, bool bNormalize, bool bConvertGrayToColor)
 	{
 		bool bRes = false;
 		switch (m_nTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
+			bRes = pClassification->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), nBatch, bNormalize, bConvertGrayToColor);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
+			bRes = pSegmentation->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), nBatch, bNormalize, bConvertGrayToColor);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(ppImage, CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), nBatch, bNormalize);
+			bRes = pDetection->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), nBatch, bNormalize, bConvertGrayToColor);
 			break;
 		}
 		return bRes;
@@ -268,15 +268,14 @@ namespace TFTool
 		}
 	}
 
-	std::vector<DetectionResult> AI::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
+	bool AI::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& nBoxes, float fIOUThres, float fScoreThres)
 	{
-		std::vector<DetectionResult> vtResult;
 		if (m_nTaskType != 2)
-			return vtResult;
+			return false;
 		else
 		{
-			vtResult = pDetection->GetWholeImageDetectionResults(fIOUThres, fScoreThres);
-			return vtResult;
+			bool bRes = pDetection->GetWholeImageDetectionResults(arrDetRes, nBoxes, fIOUThres, fScoreThres);
+			return bRes;
 		}
 	}
 

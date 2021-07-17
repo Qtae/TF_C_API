@@ -7,6 +7,7 @@
 #include <string>
 #include <time.h>
 #include <tensorflow/c/c_api.h>
+#include <tensorflow/c/c_api_experimental.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include "TFResultStructure.h"
@@ -35,7 +36,7 @@ public:
 	bool Run(std::vector<cv::Mat>, int, bool bNormalize = false);
 
 	//VisionWorks image input format, has only one input operator
-	bool Run(unsigned char**, CPoint, CPoint, int, bool bNormalize = false);
+	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, int, bool bNormalize = false, bool bConvertGrayToColor = false);
 	//bool Run(unsigned char**, CPoint, CPoint, int, bool bNormalize = false);
 
 	bool FreeModel();

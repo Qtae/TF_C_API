@@ -40,14 +40,15 @@ int main()
 	ImageSet[2] = Image3f;
 	ImageSet[3] = Image4f;
 
-	TFTool::AI* AI = new TFTool::AI();
-
+	
 	std::vector<const char*> vtInputOpNames;
 	std::vector<const char*> vtOutputOpNames;
 	vtInputOpNames.push_back("serving_default_input_1:0");
 	vtOutputOpNames.push_back("StatefulPartitionedCall:1");
+	const char* strModelPath = "D:/Work/01_TF_C/test/yolov4-tflite-train_tf-epoch2000";
 
-	AI->LoadModel("D:/Work/01_TF_C/test/yolov4-tflite-train_tf-epoch2000", vtInputOpNames, vtOutputOpNames, 2);
+	TFTool::AI* AI = new TFTool::AI();
+	AI->LoadModel(strModelPath, vtInputOpNames, vtOutputOpNames, 2);
 	AI->Run(ImageSet, 2, true); //ImageData, Batch, bNormalize
 	std::vector<std::vector<DetectionResult>> vtResult;
 	vtResult = AI->GetDetectionResults(0.3, 0.25);

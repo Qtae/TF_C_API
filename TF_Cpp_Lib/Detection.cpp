@@ -164,7 +164,7 @@ std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float f
 	return vtResult;
 }
 
-std::vector<DetectionResult> Detection::GetWholeImageDetectionResults(float fIOUThres, float fScoreThres)
+bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& nBoxes, float fIOUThres, float fScoreThres)
 {
 	//Suppose there is only one output operation in detection tasks.
 	std::vector<DetectionResult> vtResult;
@@ -257,5 +257,10 @@ std::vector<DetectionResult> Detection::GetWholeImageDetectionResults(float fIOU
 
 	DoNMS(vtResult, fIOUThres, fScoreThres, nClass);
 
-	return vtResult;
+	nBoxes = vtResult.size();
+	for (int i = 0; i < nBoxes; ++i)
+	{
+		arrDetRes[i] = vtResult[i];
+	}
+	return true;
 }

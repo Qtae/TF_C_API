@@ -27,17 +27,45 @@ TFCore::~TFCore()
 {
 }
 
+TF_SessionOptions* CreateSessionOptions(double percentage)
+{
+	TF_Status* status = TF_NewStatus();
+	TF_SessionOptions* options = TF_NewSessionOptions();
+
+	uint8_t config[13] = { 0x32, 0xb, 0x9, 0x66, 0x66, 0x66, 0x66, 0x66, 0x66, 0xee, 0x3f, 0x20, 0x1 };
+
+	//uint8_t* bytes = reinterpret_cast<uint8_t*>(&percentage);
+
+	//for (int i = 0; i < sizeof(percentage); i++)
+	//{
+	//	config[i + 3] = bytes[i];
+	//}
+
+	TF_SetConfig(options, (void *)config, 13, status);
+
+	if (TF_GetCode(status) != TF_OK) {
+		std::cerr << "Can't set options: " << TF_Message(status) << std::endl;
+
+		TF_DeleteStatus(status);
+		return nullptr;
+	}
+
+	TF_DeleteStatus(status);
+	return options;
+}
+
 bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputOpNames, std::vector<const char*>& vtOutputOpNames)
 {
 	m_ModelPath = ModelPath;
 	m_RunOptions = TF_NewBufferFromString("", 0);
+	//m_SessionOptions = CreateSessionOptions(0.99);
 	m_SessionOptions = TF_NewSessionOptions();
 	m_Graph = TF_NewGraph();
 	m_Status = TF_NewStatus();
 	m_MetaGraph = TF_NewBuffer();
-	m_Session = TF_NewSession(m_Graph, m_SessionOptions, m_Status);//Session --> 2GB
+	m_Session = TF_NewSession(m_Graph, m_SessionOptions, m_Status);
 	const char* tag = "serve";
-	m_Session = TF_LoadSessionFromSavedModel(m_SessionOptions, m_RunOptions, m_ModelPath, &tag, 1, m_Graph, m_MetaGraph, m_Status);//Session --> ~10GB
+	m_Session = TF_LoadSessionFromSavedModel(m_SessionOptions, m_RunOptions, m_ModelPath, &tag, 1, m_Graph, m_MetaGraph, m_Status);
 
 	m_nInputOps = (int)vtInputOpNames.size();
 	m_nOutputOps = (int)vtOutputOpNames.size();
@@ -856,7 +884,7 @@ bool TFCore::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSize, int nBatch, bool bNormalize)
+bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize, CPoint ptOverlapSize, CPoint ptBuffPos, int nBatch, bool bNormalize, bool bConvertGrayToColor)
 //VisionWorks image input format, has only one input operator
 {
 	if (!m_bModelLoaded)
@@ -867,73 +895,10 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSiz
 
 	if ((ptCropSize.x <= ptOverlapSize.x) || (ptCropSize.y <= ptOverlapSize.y))
 	{
-		std::cout << "Crop size must be larger than overlap size." <<std::endl;
+		std::cout << "Crop size must be larger than overlap size." << std::endl;
 		return false;
 	}
 
-	m_ptImageSize = CPoint(sizeof(ppImage[0]) / sizeof(unsigned char), sizeof(ppImage) / sizeof(ppImage[0]));
-	m_ptCropSize = ptCropSize;
-	m_ptOverlapSize = ptOverlapSize;
-
-	int nIterX = (int)(m_ptImageSize.x / (m_ptCropSize.x - m_ptOverlapSize.x));
-	int nIterY = (int)(m_ptImageSize.y / (m_ptCropSize.y - m_ptOverlapSize.y));
-	if (m_ptImageSize.x - ((m_ptCropSize.x - m_ptOverlapSize.x) * (nIterX - 1)) > m_ptCropSize.x) ++nIterX;
-	if (m_ptImageSize.y - ((m_ptCropSize.y - m_ptOverlapSize.y) * (nIterY - 1)) > m_ptCropSize.y) ++nIterY;
-	int nCurrIterX = 0;
-	int nCurrIterY = 0;
-
-	int nImage = nIterX * nIterY;
-	int nImageChannel = (int)(m_InputDims[0][3]);
-
-	float** pImageSet = new float*[nImage];
-	if (bNormalize)
-	{
-		for (int yIdx = 0; yIdx < nIterY; ++yIdx)
-		{
-			if (nCurrIterY + yIdx > m_ptImageSize.y) nCurrIterY = m_ptImageSize.y - yIdx;
-			for (int xIdx = 0; xIdx < nIterX; ++xIdx)
-			{
-				if (nCurrIterX + xIdx > m_ptImageSize.x) nCurrIterX = m_ptImageSize.x - xIdx;
-				float* pCropImage = new float[ptCropSize.x * ptCropSize.y * nImageChannel];
-				for (int y = 0; y < ptCropSize.y; ++y)
-				{
-					for (int x = 0; x < ptCropSize.x; ++x)
-					{
-						for (int c = 0; c < nImageChannel; ++c)
-						{
-							//suppose that ATI programs using same channel convention with 1ch.(channel info is in 2nd iteration)
-							pCropImage[y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[nCurrIterY + y][nCurrIterX + x * nImageChannel + c]) / float(255.);
-						}
-					}
-				}
-				pImageSet[yIdx * nIterX + xIdx] = pCropImage;
-			}
-		}
-	}
-	else
-	{
-		for (int yIdx = 0; yIdx < nIterY; ++yIdx)
-		{
-			if (nCurrIterY + yIdx > m_ptImageSize.y) nCurrIterY = m_ptImageSize.y - yIdx;
-			for (int xIdx = 0; xIdx < nIterX; ++xIdx)
-			{
-				if (nCurrIterX + xIdx > m_ptImageSize.x) nCurrIterX = m_ptImageSize.x - xIdx;
-				float* pCropImage = new float[ptCropSize.x * ptCropSize.y * nImageChannel];
-				for (int y = 0; y < ptCropSize.y; ++y)
-				{
-					for (int x = 0; x < ptCropSize.x; ++x)
-					{
-						for (int c = 0; c < nImageChannel; ++c)
-						{
-							//suppose that ATI programs using same channel convention with 1ch.(channel info is in 2nd iteration)
-							pCropImage[y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[nCurrIterY + y][nCurrIterX + x * nImageChannel + c]);
-						}
-					}
-				}
-				pImageSet[yIdx * nIterX + xIdx] = pCropImage;
-			}
-		}
-	}
 	TF_Tensor** arrInputTensors = new TF_Tensor*[m_nInputOps];
 	TF_Tensor** arrOutputTensors = new TF_Tensor*[m_nOutputOps];
 
@@ -946,59 +911,304 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptCropSize, CPoint ptOverlapSiz
 
 	auto const Deallocator = [](void*, std::size_t, void*) {};
 
+	m_ptImageSize = ptImageSize;
+	m_ptCropSize = ptCropSize;
+	m_ptOverlapSize = ptOverlapSize;
+
+	int nIterX = (int)(m_ptImageSize.x / (m_ptCropSize.x - m_ptOverlapSize.x));
+	int nIterY = (int)(m_ptImageSize.y / (m_ptCropSize.y - m_ptOverlapSize.y));
+	if (m_ptImageSize.x - ((m_ptCropSize.x - m_ptOverlapSize.x) * (nIterX - 1)) > m_ptCropSize.x) ++nIterX;
+	if (m_ptImageSize.y - ((m_ptCropSize.y - m_ptOverlapSize.y) * (nIterY - 1)) > m_ptCropSize.y) ++nIterY;
+	
+	int nImage = nIterX * nIterY;
+	int nImageChannel = (int)(m_InputDims[0][3]);
 	int nBatchIter = nImage / nBatch + (int)(bool)(nImage % nBatch);
 
-	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	if (bConvertGrayToColor)
 	{
-		int nCurrBatch = nBatch;
-		if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
-			nCurrBatch = nImage % nBatch;
-
-		float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2]];
-		for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+		if (bNormalize)
 		{
-			for (int pixIdx = 0; pixIdx < m_InputDims[0][1] * m_InputDims[0][2]; ++pixIdx)
+			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
 			{
-				ImageData[dataIdx * m_InputDims[0][1] * m_InputDims[0][2] + pixIdx] = pImageSet[batchIdx * nBatch + dataIdx][pixIdx];
+				int nCurrBatch = nBatch;
+				if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
+					nCurrBatch = nImage % nBatch;
+
+				float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2] * nImageChannel];
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+				{
+					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrXIdx = nCurrImgIdx % nIterX;
+					int nCurrYIdx = nCurrImgIdx / nIterX;
+
+					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
+					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
+					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+
+					for (int y = 0; y < ptCropSize.y; ++y)
+					{
+						for (int x = 0; x < ptCropSize.x; ++x)
+						{
+							for (int c = 0; c < nImageChannel; ++c)
+							{
+								ImageData[dataIdx * ptCropSize.y * ptCropSize.x * nImageChannel + y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[ptBuffPos.y + nCurrY + y][ptBuffPos.x + nCurrX + x]) / float(255.);
+							}
+						}
+					}
+				}
+
+				m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
+				size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
+
+				TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+					m_InputDims[0],
+					m_nInputDims[0],
+					ImageData,
+					InputDataSize,
+					Deallocator,
+					nullptr);
+
+				arrInputTensors[0] = InputImageTensor;
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+				{
+					m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+					size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+					arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+				}
+
+				TF_SessionRun(m_Session, m_RunOptions,
+					m_arrInputOps, arrInputTensors, m_nInputOps,
+					m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+					nullptr, 0, nullptr, m_Status);
+
+				//Input Tensor 메모리 해제
+				TF_DeleteTensor(arrInputTensors[0]);
+
+				delete[] ImageData;
+				if (TF_GetCode(m_Status) != TF_OK)
+				{
+					return false;
+				}
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+					m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 			}
 		}
-		m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
-		size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
-
-		TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
-			m_InputDims[0],
-			m_nInputDims[0],
-			ImageData,
-			InputDataSize,
-			Deallocator,
-			nullptr);
-
-		arrInputTensors[0] = InputImageTensor;
-
-		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+		else
 		{
-			m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
-			size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
-			arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			{
+				int nCurrBatch = nBatch;
+				if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
+					nCurrBatch = nImage % nBatch;
+
+				float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2] * nImageChannel];
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+				{
+					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrXIdx = nCurrImgIdx % nIterX;
+					int nCurrYIdx = nCurrImgIdx / nIterX;
+
+					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
+					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
+					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+
+					for (int y = 0; y < ptCropSize.y; ++y)
+					{
+						for (int x = 0; x < ptCropSize.x; ++x)
+						{
+							for (int c = 0; c < nImageChannel; ++c)
+							{
+								ImageData[dataIdx * ptCropSize.y * ptCropSize.x * nImageChannel + y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[ptBuffPos.y + nCurrY + y][ptBuffPos.x + nCurrX + x]);
+							}
+						}
+					}
+				}
+
+				m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
+				size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
+
+				TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+					m_InputDims[0],
+					m_nInputDims[0],
+					ImageData,
+					InputDataSize,
+					Deallocator,
+					nullptr);
+
+				arrInputTensors[0] = InputImageTensor;
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+				{
+					m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+					size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+					arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+				}
+
+				TF_SessionRun(m_Session, m_RunOptions,
+					m_arrInputOps, arrInputTensors, m_nInputOps,
+					m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+					nullptr, 0, nullptr, m_Status);
+
+				//Input Tensor 메모리 해제
+				TF_DeleteTensor(arrInputTensors[0]);
+				delete[] ImageData;
+				if (TF_GetCode(m_Status) != TF_OK)
+				{
+					return false;
+				}
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+					m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			}
 		}
-
-		TF_SessionRun(m_Session, m_RunOptions,
-			m_arrInputOps, arrInputTensors, m_nInputOps,
-			m_arrOutputOps, arrOutputTensors, m_nOutputOps,
-			nullptr, 0, nullptr, m_Status);
-
-		//Input Tensor 메모리 해제
-		TF_DeleteTensor(arrInputTensors[0]);
-
-		if (TF_GetCode(m_Status) != TF_OK)
-		{
-			return false;
-		}
-
-		for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
-			m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
 	}
-	
+
+	else
+	{
+		if (bNormalize)
+		{
+			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			{
+				int nCurrBatch = nBatch;
+				if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
+					nCurrBatch = nImage % nBatch;
+
+				float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2] * nImageChannel];
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+				{
+					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrXIdx = nCurrImgIdx % nIterX;
+					int nCurrYIdx = nCurrImgIdx / nIterX;
+
+					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
+					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
+					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+
+					for (int y = 0; y < ptCropSize.y; ++y)
+					{
+						for (int x = 0; x < ptCropSize.x; ++x)
+						{
+							for (int c = 0; c < nImageChannel; ++c)
+							{
+								ImageData[dataIdx * ptCropSize.y * ptCropSize.x * nImageChannel + y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[ptBuffPos.y + nCurrY + y][ptBuffPos.x + nCurrX + x * nImageChannel + c]) / float(255.);
+							}
+						}
+					}
+				}
+
+				m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
+				size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
+
+				TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+					m_InputDims[0],
+					m_nInputDims[0],
+					ImageData,
+					InputDataSize,
+					Deallocator,
+					nullptr);
+
+				arrInputTensors[0] = InputImageTensor;
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+				{
+					m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+					size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+					arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+				}
+
+				TF_SessionRun(m_Session, m_RunOptions,
+					m_arrInputOps, arrInputTensors, m_nInputOps,
+					m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+					nullptr, 0, nullptr, m_Status);
+
+				//Input Tensor 메모리 해제
+				TF_DeleteTensor(arrInputTensors[0]);
+				delete[] ImageData;
+				if (TF_GetCode(m_Status) != TF_OK)
+				{
+					return false;
+				}
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+					m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			}
+		}
+		else
+		{
+			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			{
+				int nCurrBatch = nBatch;
+				if ((batchIdx == nBatchIter - 1) && (nImage % nBatch != 0))
+					nCurrBatch = nImage % nBatch;
+
+				float* ImageData = new float[nCurrBatch * m_InputDims[0][1] * m_InputDims[0][2] * nImageChannel];
+				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
+				{
+					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrXIdx = nCurrImgIdx % nIterX;
+					int nCurrYIdx = nCurrImgIdx / nIterX;
+
+					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
+					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
+					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+
+					for (int y = 0; y < ptCropSize.y; ++y)
+					{
+						for (int x = 0; x < ptCropSize.x; ++x)
+						{
+							for (int c = 0; c < nImageChannel; ++c)
+							{
+								ImageData[dataIdx * ptCropSize.y * ptCropSize.x * nImageChannel + y * ptCropSize.x * nImageChannel + x * nImageChannel + c] = float(ppImage[ptBuffPos.y + nCurrY + y][ptBuffPos.x + nCurrX + x * nImageChannel + c]);
+							}
+						}
+					}
+				}
+
+				m_InputDims[0][0] = static_cast<long long>(nCurrBatch);
+				size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nCurrBatch);
+
+				TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
+					m_InputDims[0],
+					m_nInputDims[0],
+					ImageData,
+					InputDataSize,
+					Deallocator,
+					nullptr);
+
+				arrInputTensors[0] = InputImageTensor;
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+				{
+					m_OutputDims[opsIdx][0] = static_cast<long long>(nCurrBatch);
+					size_t OutputDataSize = m_OutputDataSizePerBatch[opsIdx] * static_cast<size_t>(nCurrBatch);
+					arrOutputTensors[opsIdx] = TF_AllocateTensor(TF_FLOAT, m_OutputDims[opsIdx], m_nOutputDims[opsIdx], OutputDataSize);
+				}
+
+				TF_SessionRun(m_Session, m_RunOptions,
+					m_arrInputOps, arrInputTensors, m_nInputOps,
+					m_arrOutputOps, arrOutputTensors, m_nOutputOps,
+					nullptr, 0, nullptr, m_Status);
+
+				//Input Tensor 메모리 해제
+				TF_DeleteTensor(arrInputTensors[0]);
+				delete[] ImageData;
+				if (TF_GetCode(m_Status) != TF_OK)
+				{
+					return false;
+				}
+
+				for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+					m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+			}
+		}
+	}
+
 	return true;
 }
 
