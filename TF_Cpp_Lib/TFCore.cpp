@@ -160,10 +160,11 @@ bool TFCore::Run(float*** pImageSet, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
-	
+
 	for (int idxOutputOps = 0; idxOutputOps < m_nOutputOps; ++idxOutputOps)
 	{
 		std::vector<TF_Tensor*> vt;
@@ -260,6 +261,7 @@ bool TFCore::Run(float** pImageSet, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -353,6 +355,7 @@ bool TFCore::Run(unsigned char*** pImageSet, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -453,6 +456,7 @@ bool TFCore::Run(unsigned char** pImageSet, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -550,7 +554,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 			for (int tensorIdx = 0; tensorIdx < m_vtOutputTensors[opsIdx].size(); ++tensorIdx)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
-			}
+			}\
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -587,8 +592,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 				int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 				int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-				if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-				if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+				if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+				if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 				for (int y = 0; y < ptCropSize.y; ++y)
 				{
@@ -627,10 +632,6 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 				m_arrOutputOps, arrOutputTensors, m_nOutputOps,
 				nullptr, 0, nullptr, m_Status);
 
-			//Input Tensor 메모리 해제
-			TF_DeleteTensor(arrInputTensors[0]);
-
-			delete[] ImageData;
 			if (TF_GetCode(m_Status) != TF_OK)
 			{
 				return false;
@@ -638,6 +639,12 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 			for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 				m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+
+			//Free Memory
+			delete[] ImageData;
+			TF_DeleteTensor(arrInputTensors[0]);
+			delete[] arrInputTensors;
+			delete[] arrOutputTensors;
 		}
 		else
 		{
@@ -650,8 +657,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 				int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 				int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-				if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-				if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+				if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+				if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 				for (int y = 0; y < ptCropSize.y; ++y)
 				{
@@ -690,10 +697,6 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 				m_arrOutputOps, arrOutputTensors, m_nOutputOps,
 				nullptr, 0, nullptr, m_Status);
 
-			//Input Tensor 메모리 해제
-			TF_DeleteTensor(arrInputTensors[0]);
-
-			delete[] ImageData;
 			if (TF_GetCode(m_Status) != TF_OK)
 			{
 				return false;
@@ -701,6 +704,12 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 			for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 				m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+
+			//Free Memory
+			delete[] ImageData;
+			TF_DeleteTensor(arrInputTensors[0]);
+			delete[] arrInputTensors;
+			delete[] arrOutputTensors;
 		}
 	}
 
@@ -717,8 +726,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 				int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 				int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-				if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-				if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+				if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+				if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 				for (int y = 0; y < ptCropSize.y; ++y)
 				{
@@ -734,6 +743,13 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 			m_InputDims[0][0] = static_cast<long long>(nImage);
 			size_t InputDataSize = m_InputDataSizePerBatch[0] * static_cast<size_t>(nImage);
+
+			for (int iii = 0; iii < nImage; ++iii)
+			{
+				cv::Mat tmp(640, 640, CV_32FC1);
+				std::memcpy(tmp.data, ImageData + iii * (ptCropSize.x * ptCropSize.y * nImageChannel), ptCropSize.x * ptCropSize.y * nImageChannel * sizeof(float));
+				int a = 1;
+			}
 
 			TF_Tensor* InputImageTensor = TF_NewTensor(TF_FLOAT,
 				m_InputDims[0],
@@ -757,10 +773,6 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 				m_arrOutputOps, arrOutputTensors, m_nOutputOps,
 				nullptr, 0, nullptr, m_Status);
 
-			//Input Tensor 메모리 해제
-			TF_DeleteTensor(arrInputTensors[0]);
-
-			delete[] ImageData;
 			if (TF_GetCode(m_Status) != TF_OK)
 			{
 				return false;
@@ -768,6 +780,12 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 			for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 				m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+
+			//Free Memory
+			delete[] ImageData;
+			TF_DeleteTensor(arrInputTensors[0]);
+			delete[] arrInputTensors;
+			delete[] arrOutputTensors;
 		}
 		else
 		{
@@ -780,8 +798,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 				int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 				int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-				if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-				if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+				if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+				if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 				for (int y = 0; y < ptCropSize.y; ++y)
 				{
@@ -820,10 +838,6 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 				m_arrOutputOps, arrOutputTensors, m_nOutputOps,
 				nullptr, 0, nullptr, m_Status);
 
-			//Input Tensor 메모리 해제
-			TF_DeleteTensor(arrInputTensors[0]);
-
-			delete[] ImageData;
 			if (TF_GetCode(m_Status) != TF_OK)
 			{
 				return false;
@@ -831,6 +845,12 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 			for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
 				m_vtOutputTensors[opsIdx].push_back(arrOutputTensors[opsIdx]);
+
+			//Free Memory
+			delete[] ImageData;
+			TF_DeleteTensor(arrInputTensors[0]);
+			delete[] arrInputTensors;
+			delete[] arrOutputTensors;
 		}
 	}
 
@@ -858,6 +878,7 @@ bool TFCore::Run(float*** pImageSet, int nBatch, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -971,6 +992,7 @@ bool TFCore::Run(float** pImageSet, int nBatch, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -1078,6 +1100,7 @@ bool TFCore::Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -1191,6 +1214,7 @@ bool TFCore::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -1303,6 +1327,7 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 			}
+			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();
 	}
@@ -1346,8 +1371,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+					if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 					for (int y = 0; y < ptCropSize.y; ++y)
 					{
@@ -1416,8 +1441,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+					if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 					for (int y = 0; y < ptCropSize.y; ++y)
 					{
@@ -1489,8 +1514,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+					if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 					for (int y = 0; y < ptCropSize.y; ++y)
 					{
@@ -1558,8 +1583,8 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 
 					int nCurrX = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 					int nCurrY = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-					if (nCurrX > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
-					if (nCurrY > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
+					if (nCurrX + m_ptCropSize.x > m_ptImageSize.x) nCurrX = m_ptImageSize.x - m_ptCropSize.x;
+					if (nCurrY + m_ptCropSize.y > m_ptImageSize.y) nCurrY = m_ptImageSize.y - m_ptCropSize.y;
 
 					for (int y = 0; y < ptCropSize.y; ++y)
 					{

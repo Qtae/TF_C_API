@@ -139,6 +139,9 @@ namespace TFTool
 		//Return whole image (cropped on run() function) detection result
 		__declspec(dllexport) bool GetWholeImageDetectionResults(DetectionResult*, int&, float fIOUThres = 0.5, float fScoreThres = 0.25);
 
+		//Return whole image (cropped on run() function) segmentation result
+		__declspec(dllexport) bool GetWholeImageSegmentationResults(unsigned char* pImg, int nClsNo);
+
 		//Returns true when model is loaded
 		__declspec(dllexport) bool IsModelLoaded();
 
@@ -152,5 +155,6 @@ namespace TFTool
 		Classification *pClassification;
 		Segmentation* pSegmentation;
 		Detection* pDetection;
+
 	};
 }

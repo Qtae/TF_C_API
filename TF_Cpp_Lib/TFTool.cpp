@@ -297,6 +297,17 @@ namespace TFTool
 		}
 	}
 
+	bool AI::GetWholeImageSegmentationResults(unsigned char* pImg, int nClsNo)
+	{
+		if (m_nTaskType != 1)
+			return false;
+		else
+		{
+			bool bRes = pSegmentation->GetWholeImageSegmentationResults(pImg, nClsNo);
+			return bRes;
+		}
+	}
+
 	bool AI::IsModelLoaded()
 	{
 		bool bRes = false;

@@ -200,8 +200,8 @@ bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& n
 					{
 						int nXOffset = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
 						int nYOffset = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-						if (nXOffset > m_ptImageSize.x) nXOffset = m_ptImageSize.x - m_ptCropSize.x;
-						if (nYOffset > m_ptImageSize.y) nYOffset = m_ptImageSize.y - m_ptCropSize.y;
+						if (nXOffset + m_ptCropSize.x > m_ptImageSize.x) nXOffset = m_ptImageSize.x - m_ptCropSize.x;
+						if (nYOffset + m_ptCropSize.y > m_ptImageSize.y) nYOffset = m_ptImageSize.y - m_ptCropSize.y;
 
 						DetectionResult DetRes;
 						DetRes.x = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
@@ -269,6 +269,7 @@ bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& n
 		{
 			TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
 		}
+		m_vtOutputTensors[opsIdx].clear();
 	}
 	m_vtOutputTensors.clear();
 
