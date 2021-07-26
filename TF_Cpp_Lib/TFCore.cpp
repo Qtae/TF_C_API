@@ -554,7 +554,7 @@ bool TFCore::Run(unsigned char** ppImage, CPoint ptImageSize, CPoint ptCropSize,
 			for (int tensorIdx = 0; tensorIdx < m_vtOutputTensors[opsIdx].size(); ++tensorIdx)
 			{
 				TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
-			}\
+			}
 			m_vtOutputTensors[opsIdx].clear();
 		}
 		m_vtOutputTensors.clear();

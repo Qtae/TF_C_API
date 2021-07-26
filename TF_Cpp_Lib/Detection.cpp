@@ -1,5 +1,6 @@
 #pragma once
 #include "Detection.h"
+#include "math.h"
 
 Detection::Detection()
 {
@@ -171,8 +172,9 @@ bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& n
 	int nBatch = (int)m_OutputDims[0][0];
 	int nGridX = (int)m_OutputDims[0][1];
 	int nGridY = (int)m_OutputDims[0][2];
-	int nAnchor = (int)m_OutputDims[0][3];
-	int nClass = (int)m_OutputDims[0][4] - 5;
+	//int nAnchor = (int)m_OutputDims[0][3];
+	int nAnchor = 3;
+	int nClass = ((int)m_OutputDims[0][3] / nAnchor) - 5; 
 
 	int nIterX = (int)(m_ptImageSize.x / (m_ptCropSize.x - m_ptOverlapSize.x));
 	int nIterY = (int)(m_ptImageSize.y / (m_ptCropSize.y - m_ptOverlapSize.y));
@@ -181,6 +183,10 @@ bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& n
 	int nCurrXIdx = 0;
 	int nCurrYIdx = 0;
 	int nCurrImgIdx = 0;
+	float fXYScale = 1.05;
+	int nStride = 32;
+	int nAnchorX[3] = {90, 102, 135};
+	int nAnchorY[3] = {90, 168, 168};
 
 	for (int i = 0; i < m_vtOutputTensors[0].size(); ++i)//Tensor iteration
 	{
@@ -203,43 +209,48 @@ bool Detection::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& n
 						if (nXOffset + m_ptCropSize.x > m_ptImageSize.x) nXOffset = m_ptImageSize.x - m_ptCropSize.x;
 						if (nYOffset + m_ptCropSize.y > m_ptImageSize.y) nYOffset = m_ptImageSize.y - m_ptCropSize.y;
 
+						float fRawX = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) +
+											 grdXIdx * nGridY * nAnchor * (nClass + 5) +
+											 grdYIdx * nAnchor * (nClass + 5) +
+											 ancIdx * (nClass + 5) +
+											 0];
+						float fRawY = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) +
+											 grdXIdx * nGridY * nAnchor * (nClass + 5) +
+											 grdYIdx * nAnchor * (nClass + 5) +
+											 ancIdx * (nClass + 5) +
+											 1];
+						float fRawW = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) +
+											 grdXIdx * nGridY * nAnchor * (nClass + 5) +
+											 grdYIdx * nAnchor * (nClass + 5) +
+											 ancIdx * (nClass + 5) +
+											 2];
+						float fRawH = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) +
+											 grdXIdx * nGridY * nAnchor * (nClass + 5) +
+											 grdYIdx * nAnchor * (nClass + 5) +
+											 ancIdx * (nClass + 5) +
+											 3];
+						float fRawObj = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) +
+											   grdXIdx * nGridY * nAnchor * (nClass + 5) +
+											   grdYIdx * nAnchor * (nClass + 5) +
+											   ancIdx * (nClass + 5) +
+											   4];
+
 						DetectionResult DetRes;
-						DetRes.x = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
-											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
-											   grdYIdx * nAnchor * (nClass + 5) + 
-											   ancIdx * (nClass + 5) + 
-											   0] + 
-								   nXOffset;
-						DetRes.y = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
-											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
-											   grdYIdx * nAnchor * (nClass + 5) + 
-											   ancIdx * (nClass + 5) + 
-											   1] +
-								   nYOffset;
-						DetRes.w = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
-											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
-											   grdYIdx * nAnchor * (nClass + 5) + 
-											   ancIdx * (nClass + 5) + 
-											   2];
-						DetRes.h = (int)output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
-											   grdXIdx * nGridY * nAnchor * (nClass + 5) + 
-											   grdYIdx * nAnchor * (nClass + 5) + 
-											   ancIdx * (nClass + 5) + 
-											   3];
-						DetRes.Objectness = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) + 
-												   grdXIdx * nGridY * nAnchor * (nClass + 5) +
-												   grdYIdx * nAnchor * (nClass + 5) +
-												   ancIdx * (nClass + 5) +
-												   4];
+						DetRes.x = (int)(((exp(fRawX) / (exp(fRawX) + 1)) * fXYScale - 0.5 * (fXYScale - 1) + grdYIdx) * nStride) + nXOffset;
+						DetRes.y = (int)(((exp(fRawY) / (exp(fRawY) + 1)) * fXYScale - 0.5 * (fXYScale - 1) + grdXIdx) * nStride) + nYOffset;
+						DetRes.w = (int)(exp(fRawW) * nAnchorY[ancIdx]);
+						DetRes.h = (int)(exp(fRawH) * nAnchorX[ancIdx]);
+						DetRes.Objectness = exp(fRawObj) / (exp(fRawObj) + 1);
 						int nBestClass = -1;
 						float fScore = 0.;
 						for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
 						{
-							float fCurrScore = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5)
-								+ grdXIdx * nGridY * nAnchor * (nClass + 5)
-								+ grdYIdx * nAnchor * (nClass + 5)
-								+ ancIdx * (nClass + 5)
-								+ 5 + clsIdx];
+							float fRawCurrScore = output[imgIdx * nGridX * nGridY * nAnchor * (nClass + 5) +
+														 grdXIdx * nGridY * nAnchor * (nClass + 5) +
+														 grdYIdx * nAnchor * (nClass + 5) +
+														 ancIdx * (nClass + 5) +
+														 5 + clsIdx];
+							float fCurrScore = exp(fRawCurrScore) / (exp(fRawCurrScore) + 1);
 							if (fCurrScore >= fScore)
 							{
 								nBestClass = clsIdx;
