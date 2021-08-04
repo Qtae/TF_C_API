@@ -9,6 +9,7 @@ public:
 	~Detection();
 	std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
 	bool GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& ,float fIOUThres = 0.5, float fScoreThres = 0.25);
+	bool GetWholeImageDetectionResultsO(DetectionResult* arrDetRes, int&, float fIOUThres = 0.5, float fScoreThres = 0.25);
 
 private:
 	float CalculateIOU(DetectionResult, DetectionResult);
