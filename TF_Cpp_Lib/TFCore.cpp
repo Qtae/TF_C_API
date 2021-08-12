@@ -99,9 +99,9 @@ bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputO
 			return false;
 		}
 		m_arrInputOps[i] = TF_Output{ InputOp, nInputOpOutputIndex };
-		m_nInputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrInputOps[0], m_Status);
+		m_nInputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrInputOps[i], m_Status);
 		int64_t* InputShape = new int64_t[m_nInputDims[i]];
-		TF_GraphGetTensorShape(m_Graph, m_arrInputOps[0], InputShape, m_nInputDims[i], m_Status);
+		TF_GraphGetTensorShape(m_Graph, m_arrInputOps[i], InputShape, m_nInputDims[i], m_Status);
 		m_InputDims[i] = new long long[m_nInputDims[i]];
 		m_InputDims[i][0] = static_cast<long long>(1);
 		for (int j = 1; j < m_nInputDims[i]; ++j) m_InputDims[i][j] = static_cast<long long>(InputShape[j]);
@@ -125,13 +125,13 @@ bool TFCore::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputO
 		}
 		int n = TF_OperationNumOutputs(OutputOp);
 		m_arrOutputOps[i] = TF_Output{ OutputOp, nOutputOpOutputIndex };
-		m_nOutputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrOutputOps[0], m_Status);
+		m_nOutputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrOutputOps[i], m_Status);
 		int64_t* OutputShape = new int64_t[m_nOutputDims[i]];
-		TF_GraphGetTensorShape(m_Graph, m_arrOutputOps[0], OutputShape, m_nOutputDims[i], m_Status);
+		TF_GraphGetTensorShape(m_Graph, m_arrOutputOps[i], OutputShape, m_nOutputDims[i], m_Status);
 		m_OutputDims[i] = new long long[m_nOutputDims[i]];
 		m_OutputDims[i][0] = static_cast<long long>(1);
 		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDims[i][j] = static_cast<long long>(OutputShape[j]);
-		m_OutputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(m_arrOutputOps[0]));
+		m_OutputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(m_arrOutputOps[i]));
 		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDataSizePerBatch[i] = m_OutputDataSizePerBatch[i] * static_cast<int>(OutputShape[j]);
 		delete[] OutputShape;
 	}
