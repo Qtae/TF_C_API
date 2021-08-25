@@ -292,7 +292,7 @@ namespace TFTool
 			return false;
 		else
 		{
-			bool bRes = pDetection->GetWholeImageDetectionResultsO(arrDetRes, nBoxes, fIOUThres, fScoreThres);
+			bool bRes = pDetection->GetWholeImageDetectionResultsTest(arrDetRes, nBoxes, fIOUThres, fScoreThres);
 			return bRes;
 		}
 	}
