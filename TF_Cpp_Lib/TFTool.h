@@ -125,7 +125,8 @@ namespace TFTool
 		__declspec(dllexport) bool FreeModel();
 
 		//Returns classification result
-		__declspec(dllexport) std::vector<std::vector<std::vector<float>>> GetClassificationResults();
+		//pClassificationResultArray
+		__declspec(dllexport) bool GetClassificationResults(float*** pClassificationResultArray);
 
 		//Returns classification result
 		__declspec(dllexport) std::vector<std::vector<int>> GetClassificationResults(float fSoftmxThresh = 0);
@@ -137,7 +138,7 @@ namespace TFTool
 		__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetDetectionResults(float fIOUThres = 0.5, float fScoreThres = 0.25);
 
 		//Return whole image (cropped on run() function) detection result
-		__declspec(dllexport) bool GetWholeImageDetectionResults(DetectionResult*, int&, float fIOUThres = 0.5, float fScoreThres = 0.25);
+		__declspec(dllexport) bool GetWholeImageDetectionResults(DetectionResult* pDetectionResultArray, int& nResult, float fIOUThres = 0.5, float fScoreThres = 0.25);
 
 		//Return whole image (cropped on run() function) segmentation result
 		__declspec(dllexport) bool GetWholeImageSegmentationResults(unsigned char* pImg, int nClsNo);

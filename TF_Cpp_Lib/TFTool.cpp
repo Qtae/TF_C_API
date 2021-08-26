@@ -238,15 +238,13 @@ namespace TFTool
 		return bRes;
 	}
 
-	std::vector<std::vector<std::vector<float>>> AI::GetClassificationResults()
+	bool AI::GetClassificationResults(float*** pClassificationResultArray)
 	{
-		std::vector<std::vector<std::vector<float>>> vtResult;
 		if (m_nTaskType != 0) 
-			return vtResult;
+			return false;
 		else
 		{
-			vtResult = pClassification->GetOutput();
-			return vtResult;
+			pClassification->GetOutput(pClassificationResultArray);
 		}
 	}
 

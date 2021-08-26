@@ -88,12 +88,11 @@ bool Classification::LoadEnsembleModel(std::vector<const char*> vtModelPath, std
 	return true;
 }
 
-std::vector<std::vector<std::vector<float>>> Classification::GetOutput()
+bool Classification::GetOutput(float*** pClassificationResultArray)
 {
-	std::vector<std::vector<std::vector<float>>> vtResult;
 	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)//output operator 갯수 iteration
 	{
-		std::vector<std::vector<float>> vtResultOp;
+		int nPreBatch = 0;
 		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)//Tensor iteration
 		{
 			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
@@ -102,17 +101,15 @@ std::vector<std::vector<std::vector<float>>> Classification::GetOutput()
 			std::memcpy(output, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nClass * sizeof(float));
 			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
 			{
-				std::vector<float> vtSoftMax;
 				for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
 				{
-					vtSoftMax.push_back(output[batchIdx * nClass + clsIdx]);
+					pClassificationResultArray[opsIdx][nPreBatch + batchIdx][clsIdx] = output[batchIdx * nClass + clsIdx];
 				}
-				vtResultOp.push_back(vtSoftMax);
 			}
+			nPreBatch += nBatch;
 		}
-		vtResult.push_back(vtResultOp);
 	}
-	return vtResult;
+	return true;
 }
 
 std::vector<std::vector<float>> Classification::GetOutputByOpIndex(int nOutputOpIndex)
