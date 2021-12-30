@@ -15,6 +15,37 @@
 
 class TFCore
 {
+protected:
+	const char* mModelPath;
+
+	bool mIsModelLoaded;
+	bool mIsDataLoaded;
+
+	TF_Session* mSession;
+	TF_Buffer* mRunOptions;
+	TF_SessionOptions* mSessionOptions;
+	TF_Graph* mGraph;
+	TF_Status* mStatus;
+	TF_Buffer* mMetaGraph;
+
+	int mInputOpNum;
+	int mOutputOpNum;
+	TF_Output* mInputOpsArr;
+	TF_Output* mOutputOpsArr;
+
+	int* mInputDims;
+	int* mOutputDims;
+	long long** mInputDimsArr;
+	long long** mOutputDimsArr;
+	std::size_t* mInputDataSizePerBatch;
+	std::size_t* mOutputDataSizePerBatch;
+
+	std::vector<std::vector<TF_Tensor*>> mOutputTensors;
+
+	CPoint mImageSize;
+	CPoint mCropSize;
+	CPoint mOverlapSize;
+
 public:
 	TFCore();
 	~TFCore();
@@ -51,36 +82,4 @@ public:
 
 private:
 	bool _Run();
-
-protected:
-	const char* m_ModelPath;
-	std::vector<const char*> m_vtClassNames;
-
-	bool m_bModelLoaded;
-	bool m_bDataLoaded;
-
-	TF_Session* m_Session;
-	TF_Buffer* m_RunOptions;
-	TF_SessionOptions* m_SessionOptions;
-	TF_Graph* m_Graph;
-	TF_Status* m_Status;
-	TF_Buffer* m_MetaGraph;
-
-	int m_nInputOps;
-	int m_nOutputOps;
-	TF_Output* m_arrInputOps;
-	TF_Output* m_arrOutputOps;
-
-	int* m_nInputDims;
-	int* m_nOutputDims;
-	long long** m_InputDims;
-	long long** m_OutputDims;
-	std::size_t* m_InputDataSizePerBatch;
-	std::size_t* m_OutputDataSizePerBatch;
-
-	std::vector<std::vector<TF_Tensor*>> m_vtOutputTensors;
-
-	CPoint m_ptImageSize;
-	CPoint m_ptCropSize;
-	CPoint m_ptOverlapSize;
 };

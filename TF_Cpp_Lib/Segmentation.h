@@ -4,6 +4,10 @@
 
 class Segmentation : public TFCore
 {
+private:
+	std::vector<std::vector<float*>> mOutputRes;
+	std::vector<std::vector<int*>> mClassMask;
+
 public:
 	Segmentation();
 	~Segmentation();
@@ -14,8 +18,4 @@ public:
 
 private:
 	bool FreeOutputMap();
-
-private:
-	std::vector<std::vector<float*>> m_vtOutputRes;
-	std::vector<std::vector<int*>> m_vtClassMask;
 };

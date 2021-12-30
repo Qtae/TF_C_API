@@ -18,5 +18,4 @@ public:
 	void GetPredClsAndSftmxByOpIndex(std::vector<int>&, std::vector<float>&, float, int nOutputOpIndex = 0);
 	std::vector<std::vector<int>> GetHardVoteEnsembleOutput();
 	std::vector<std::vector<int>> GetSoftVoteEnsembleOutput();
-
 };

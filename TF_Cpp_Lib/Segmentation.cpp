@@ -12,40 +12,40 @@ Segmentation::~Segmentation()
 
 std::vector<std::vector<float *>> Segmentation::GetOutput()
 {
-	if (!m_vtOutputRes.empty())
+	if (!mOutputRes.empty())
 		FreeOutputMap();
 
-	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)//output operator 偎熱 iteration
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)//output operator 偎熱 iteration
 	{
-		std::vector<float*> vtResultOp;
-		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)//Tensor iteration
+		std::vector<float*> resultOp;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)//Tensor iteration
 		{
-			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
-			int nOutputSize = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1) * (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1);
-			float *pOutput = new float[nBatch * nOutputSize];
-			std::memcpy(pOutput, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nOutputSize * sizeof(float));
-			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int outputSize = (int)TF_Dim(mOutputTensors[opsIdx][i], 1) * (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *outputImg = new float[batch * outputSize];
+			std::memcpy(outputImg, TF_TensorData(mOutputTensors[opsIdx][i]), batch * outputSize * sizeof(float));
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
-				float* pOutputBatch = new float[nOutputSize];
-				std::memcpy(pOutputBatch, pOutput + batchIdx * nOutputSize, nOutputSize * sizeof(float));
-				vtResultOp.push_back(pOutputBatch);
+				float* batchOutputImg = new float[outputSize];
+				std::memcpy(batchOutputImg, outputImg + batchIdx * outputSize, outputSize * sizeof(float));
+				resultOp.push_back(batchOutputImg);
 			}
-			delete[] pOutput;
+			delete[] outputImg;
 		}
-		m_vtOutputRes.push_back(vtResultOp);
+		mOutputRes.push_back(resultOp);
 	}
-	return m_vtOutputRes;
+	return mOutputRes;
 }
 
 bool Segmentation::FreeOutputMap()
 {
-	if (!m_vtOutputRes.empty())
+	if (!mOutputRes.empty())
 	{
-		for (int opsIdx = 0; opsIdx < m_vtOutputRes.size(); ++opsIdx)
+		for (int opsIdx = 0; opsIdx < mOutputRes.size(); ++opsIdx)
 		{
-			for (int nIdx = 0; nIdx < m_vtOutputRes[opsIdx].size(); ++nIdx)
+			for (int nIdx = 0; nIdx < mOutputRes[opsIdx].size(); ++nIdx)
 			{
-				delete[] m_vtOutputRes[opsIdx][nIdx];
+				delete[] mOutputRes[opsIdx][nIdx];
 			}
 		}
 	}
@@ -54,95 +54,94 @@ bool Segmentation::FreeOutputMap()
 
 std::vector<std::vector<int*>> Segmentation::GetWholeClsMask()
 {
-	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)//output operator 偎熱 iteration
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)//output operator 偎熱 iteration
 	{
-		std::vector<int*> vtClassMaskOp;
-		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)//Tensor iteration
+		std::vector<int*> clsMaskOp;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)//Tensor iteration
 		{
-			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
-			int nOutputSize = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1) * (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1);
-			float *pOutput = new float[nBatch * nOutputSize];
-			std::memcpy(pOutput, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nOutputSize * sizeof(float));
-			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int outputSize = (int)TF_Dim(mOutputTensors[opsIdx][i], 1) * (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *outputImg = new float[batch * outputSize];
+			std::memcpy(outputImg, TF_TensorData(mOutputTensors[opsIdx][i]), batch * outputSize * sizeof(float));
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
-				float* pOutputBatch = new float[nOutputSize];
-				std::memcpy(pOutputBatch, pOutput + batchIdx * nOutputSize, nOutputSize * sizeof(float));
+				float* batchOutputImg = new float[outputSize];
+				std::memcpy(batchOutputImg, outputImg + batchIdx * outputSize, outputSize * sizeof(float));
 			}
-			delete[] pOutput;
+			delete[] outputImg;
 		}
-		m_vtClassMask.push_back(vtClassMaskOp);
+		mClassMask.push_back(clsMaskOp);
 	}
-	return m_vtClassMask;
+	return mClassMask;
 }
 
 std::vector<std::vector<int*>> Segmentation::GetBinaryMaskWithClsIndex(int nClsIndex)
 {
-	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)
 	{
-		std::vector<int*> vtClassMaskOp;
-		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)//Tensor iteration
+		std::vector<int*> clsMaskOp;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)//Tensor iteration
 		{
-			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
-			int nOutputSize = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1) * (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1);
-			float *pOutput = new float[nBatch * nOutputSize];
-			std::memcpy(pOutput, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nOutputSize * sizeof(float));
-			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int outputSize = (int)TF_Dim(mOutputTensors[opsIdx][i], 1) * (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *outputImg = new float[batch * outputSize];
+			std::memcpy(outputImg, TF_TensorData(mOutputTensors[opsIdx][i]), batch * outputSize * sizeof(float));
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
-				int* pOutputBatch = new int[nOutputSize];
-				for (int pixIdx = 0; pixIdx < nOutputSize; ++pixIdx)
+				int* batchOutputImg = new int[outputSize];
+				for (int pixIdx = 0; pixIdx < outputSize; ++pixIdx)
 				{
-					if ((int)pOutput[batchIdx * nOutputSize + pixIdx] == nClsIndex)
-						pOutputBatch[pixIdx] = 1;
+					if ((int)outputImg[batchIdx * outputSize + pixIdx] == nClsIndex)
+						batchOutputImg[pixIdx] = 1;
 					else
-						pOutputBatch[pixIdx] = 0;
+						batchOutputImg[pixIdx] = 0;
 				}
-				vtClassMaskOp.push_back(pOutputBatch);
+				clsMaskOp.push_back(batchOutputImg);
 			}
-			delete[] pOutput;
+			delete[] outputImg;
 		}
-		m_vtClassMask.push_back(vtClassMaskOp);
+		mClassMask.push_back(clsMaskOp);
 	}
-	return m_vtClassMask;
+	return mClassMask;
 }
 
-bool Segmentation::GetWholeImageSegmentationResults(unsigned char* pImg, int nClsNo)
+bool Segmentation::GetWholeImageSegmentationResults(unsigned char* outputImg, int clsNo)
 {
 	//Suppose there is only one output operation in detection tasks.
-	std::vector<DetectionResult> vtResult;
-	int nBatch = (int)m_OutputDims[0][0];
-	int nWidth = (int)m_OutputDims[0][1];
-	int nHeight = (int)m_OutputDims[0][2];
-	int nChannel = (int)m_OutputDims[0][3];
-	if (nClsNo >= nChannel) return false;
+	int width = (int)mOutputDimsArr[0][1];
+	int height = (int)mOutputDimsArr[0][2];
+	int channel = (int)mOutputDimsArr[0][3];
+	if (clsNo >= channel) return false;
 
-	int nIterX = (int)(m_ptImageSize.x / (m_ptCropSize.x - m_ptOverlapSize.x));
-	int nIterY = (int)(m_ptImageSize.y / (m_ptCropSize.y - m_ptOverlapSize.y));
-	if (m_ptImageSize.x - ((m_ptCropSize.x - m_ptOverlapSize.x) * (nIterX - 1)) > m_ptCropSize.x) ++nIterX;
-	if (m_ptImageSize.y - ((m_ptCropSize.y - m_ptOverlapSize.y) * (nIterY - 1)) > m_ptCropSize.y) ++nIterY;
-	int nCurrXIdx = 0;
-	int nCurrYIdx = 0;
-	int nCurrImgIdx = 0;
+	int itX = (int)(mImageSize.x / (mCropSize.x - mOverlapSize.x));
+	int itY = (int)(mImageSize.y / (mCropSize.y - mOverlapSize.y));
+	if (mImageSize.x - ((mCropSize.x - mOverlapSize.x) * (itX - 1)) > mCropSize.x) ++itX;
+	if (mImageSize.y - ((mCropSize.y - mOverlapSize.y) * (itY - 1)) > mCropSize.y) ++itY;
+	int currXIdx = 0;
+	int currYIdx = 0;
+	int currImgIdx = 0;
 
-	for (int i = 0; i < m_vtOutputTensors[0].size(); ++i)//Tensor iteration
+	for (int i = 0; i < mOutputTensors[0].size(); ++i)//Tensor iteration
 	{
-		float *output = new float[nBatch * nWidth * nHeight * nChannel];
-		std::memcpy(output, TF_TensorData(m_vtOutputTensors[0][i]), nBatch * nWidth * nHeight * nChannel * sizeof(float));
+		int batch = (int)TF_Dim(mOutputTensors[0][i], 0);
+		float *output = new float[batch * width * height * channel];
+		std::memcpy(output, TF_TensorData(mOutputTensors[0][i]), batch * width * height * channel * sizeof(float));
 
-		for (int imgIdx = 0; imgIdx < nBatch; ++imgIdx)//Image in tensor iteration
+		for (int imgIdx = 0; imgIdx < batch; ++imgIdx)//Image in tensor iteration
 		{
-			nCurrImgIdx = i * nBatch + imgIdx;
-			nCurrXIdx = nCurrImgIdx % nIterX;
-			nCurrYIdx = nCurrImgIdx / nIterX;
-			int nXOffset = (m_ptCropSize.x - m_ptOverlapSize.x) * nCurrXIdx;
-			int nYOffset = (m_ptCropSize.y - m_ptOverlapSize.y) * nCurrYIdx;
-			if (nXOffset + m_ptCropSize.x > m_ptImageSize.x) nXOffset = m_ptImageSize.x - m_ptCropSize.x;
-			if (nYOffset + m_ptCropSize.y > m_ptImageSize.y) nYOffset = m_ptImageSize.y - m_ptCropSize.y;
-			
-			for (int y = 0; y < nHeight; ++y)
+			currImgIdx = i * batch + imgIdx;
+			currXIdx = currImgIdx % itX;
+			currYIdx = currImgIdx / itX;
+			int xOffset = (mCropSize.x - mOverlapSize.x) * currXIdx;
+			int yOffset = (mCropSize.y - mOverlapSize.y) * currYIdx;
+			if (xOffset + mCropSize.x > mImageSize.x) xOffset = mImageSize.x - mCropSize.x;
+			if (yOffset + mCropSize.y > mImageSize.y) yOffset = mImageSize.y - mCropSize.y;
+
+			for (int y = 0; y < height; ++y)
 			{
-				for (int x = 0; x < nWidth; ++x)
+				for (int x = 0; x < width; ++x)
 				{
-					pImg[(nYOffset + y) * m_ptImageSize.x + nXOffset + x] = output[imgIdx * nHeight * nWidth * nChannel + y * nWidth * nChannel + x * nChannel + nClsNo];
+					outputImg[(yOffset + y) * mImageSize.x + xOffset + x] = output[imgIdx * height * width * channel + y * width * channel + x * channel + clsNo];
 				}
 			}
 		}
@@ -150,15 +149,15 @@ bool Segmentation::GetWholeImageSegmentationResults(unsigned char* pImg, int nCl
 	}
 
 
-	for (int opsIdx = 0; opsIdx < m_nInputOps; ++opsIdx)
+	for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
 	{
-		for (int tensorIdx = 0; tensorIdx < m_vtOutputTensors[opsIdx].size(); ++tensorIdx)
+		for (int tensorIdx = 0; tensorIdx < mOutputTensors[opsIdx].size(); ++tensorIdx)
 		{
-			TF_DeleteTensor(m_vtOutputTensors[opsIdx][tensorIdx]);
+			TF_DeleteTensor(mOutputTensors[opsIdx][tensorIdx]);
 		}
-		m_vtOutputTensors[opsIdx].clear();
+		mOutputTensors[opsIdx].clear();
 	}
-	m_vtOutputTensors.clear();
+	mOutputTensors.clear();
 
 	return true;
 }

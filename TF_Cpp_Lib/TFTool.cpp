@@ -10,10 +10,10 @@ namespace TFTool
 {
 	AI::AI()
 	{
-		m_nTaskType = -1;
-		pClassification = new Classification();
-		pSegmentation = new Segmentation();
-		pDetection = new Detection();
+		mTaskType = -1;
+		mClassification = new Classification();
+		mSegmentation = new Segmentation();
+		mDetection = new Detection();
 	}
 
 	AI::~AI()
@@ -21,200 +21,200 @@ namespace TFTool
 
 	}
 
-	bool AI::LoadModel(const char* ModelPath, std::vector<const char*> &vtInputOpNames, std::vector<const char*>& vtOutputOpNames, int nTaskType)
+	bool AI::LoadModel(const char* modelPath, std::vector<const char*> &inputOpNames, std::vector<const char*>& outputOpNames, int taskType)
 	{
-		m_nTaskType = nTaskType;
+		mTaskType = taskType;
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->LoadModel(ModelPath, vtInputOpNames, vtOutputOpNames);
+			bRes = mClassification->LoadModel(modelPath, inputOpNames, outputOpNames);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->LoadModel(ModelPath, vtInputOpNames, vtOutputOpNames);
+			bRes = mSegmentation->LoadModel(modelPath, inputOpNames, outputOpNames);
 			break;
 		case 2://detection
-			bRes = pDetection->LoadModel(ModelPath, vtInputOpNames, vtOutputOpNames);
+			bRes = mDetection->LoadModel(modelPath, inputOpNames, outputOpNames);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(float** pImageSet, bool bNormalize)
+	bool AI::Run(float** inputImgArr, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, bNormalize);
+			bRes = mClassification->Run(inputImgArr, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, bNormalize);
+			bRes = mDetection->Run(inputImgArr, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(float*** pImageSet, bool bNormalize)
+	bool AI::Run(float*** inputImgArr, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, bNormalize);
+			bRes = mClassification->Run(inputImgArr, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, bNormalize);
+			bRes = mDetection->Run(inputImgArr, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char** pImageSet, bool bNormalize)
+	bool AI::Run(unsigned char** inputImgArr, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, bNormalize);
+			bRes = mClassification->Run(inputImgArr, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, bNormalize);
+			bRes = mDetection->Run(inputImgArr, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char*** pImageSet, bool bNormalize)
+	bool AI::Run(unsigned char*** inputImgArr, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, bNormalize);
+			bRes = mClassification->Run(inputImgArr, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, bNormalize);
+			bRes = mDetection->Run(inputImgArr, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char** ppImage, int nImageSizeX, int nImageSizeY, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBuffPosX, int nBuffPosY, bool bNormalize, bool bConvertGrayToColor)
+	bool AI::Run(unsigned char** inputImg, int imgSizeX, int imgSizeY, int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY, bool bNormalize, bool bConvertGrayToColor)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), bNormalize, bConvertGrayToColor);
+			bRes = mClassification->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), bNormalize, bConvertGrayToColor);
+			bRes = mSegmentation->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), bNormalize, bConvertGrayToColor);
+			bRes = mDetection->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(float*** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(float*** inputImgArr, int batch, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
+			bRes = mClassification->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = mDetection->Run(inputImgArr, batch, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(float** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(float** inputImgArr, int batch, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
+			bRes = mClassification->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = mDetection->Run(inputImgArr, batch, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char*** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(unsigned char*** inputImgArr, int batch, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
+			bRes = mClassification->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = mDetection->Run(inputImgArr, batch, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char** pImageSet, int nBatch, bool bNormalize)
+	bool AI::Run(unsigned char** inputImgArr, int batch, bool bNormalize)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(pImageSet, nBatch, bNormalize);
+			bRes = mClassification->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(pImageSet, nBatch, bNormalize);
+			bRes = mSegmentation->Run(inputImgArr, batch, bNormalize);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(pImageSet, nBatch, bNormalize);
+			bRes = mDetection->Run(inputImgArr, batch, bNormalize);
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::Run(unsigned char** ppImage, int nImageSizeX, int nImageSizeY, int nCropSizeX, int nCropSizeY, int nOverlapSizeX, int nOverlapSizeY, int nBuffPosX, int nBuffPosY, int nBatch, bool bNormalize, bool bConvertGrayToColor)
+	bool AI::Run(unsigned char** inputImg, int imgSizeX, int imgSizeY, int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY, int batch, bool bNormalize, bool bConvertGrayToColor)
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), nBatch, bNormalize, bConvertGrayToColor);
+			bRes = mClassification->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor);
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), nBatch, bNormalize, bConvertGrayToColor);
+			bRes = mSegmentation->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor);
 			break;
 		case 2://detection
-			bRes = pDetection->Run(ppImage, CPoint(nImageSizeX, nImageSizeY), CPoint(nCropSizeX, nCropSizeY), CPoint(nOverlapSizeX, nOverlapSizeY), CPoint(nBuffPosX, nBuffPosY), nBatch, bNormalize, bConvertGrayToColor);
+			bRes = mDetection->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor);
 			break;
 		}
 		return bRes;
@@ -223,85 +223,85 @@ namespace TFTool
 	bool AI::FreeModel()
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->FreeModel();
+			bRes = mClassification->FreeModel();
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->FreeModel();
+			bRes = mSegmentation->FreeModel();
 			break;
 		case 2://detection
-			bRes = pDetection->FreeModel();
+			bRes = mDetection->FreeModel();
 			break;
 		}
 		return bRes;
 	}
 
-	bool AI::GetClassificationResults(float*** pClassificationResultArray)
+	bool AI::GetClassificationResults(float*** classificationResultArray)
 	{
-		if (m_nTaskType != 0) 
+		if (mTaskType != 0)
 			return false;
 		else
 		{
-			pClassification->GetOutput(pClassificationResultArray);
+			mClassification->GetOutput(classificationResultArray);
 		}
 	}
 
-	std::vector<std::vector<int>> AI::GetClassificationResults(float fSoftmxThresh)
+	std::vector<std::vector<int>> AI::GetClassificationResults(float softmxThresh)
 	{
-		std::vector<std::vector<int>> vtResult;
-		if (m_nTaskType != 0)
-			return vtResult;
+		std::vector<std::vector<int>> result;
+		if (mTaskType != 0)
+			return result;
 		else
 		{
-			vtResult = pClassification->GetPredCls(fSoftmxThresh);
-			return vtResult;
+			result = mClassification->GetPredCls(softmxThresh);
+			return result;
 		}
 	}
 
 	std::vector<std::vector<float*>> AI::GetSegmentationResults()
 	{
-		std::vector<std::vector<float*>> vtResult;
-		if (m_nTaskType != 1)
-			return vtResult;
+		std::vector<std::vector<float*>> result;
+		if (mTaskType != 1)
+			return result;
 		else
 		{
-			vtResult = pSegmentation->GetOutput();
-			return vtResult;
+			result = mSegmentation->GetOutput();
+			return result;
 		}
 	}
 
-	std::vector<std::vector<DetectionResult>> AI::GetDetectionResults(float fIOUThres, float fScoreThres)
+	std::vector<std::vector<DetectionResult>> AI::GetDetectionResults(float iouThresh, float scoreThresh)
 	{
-		std::vector<std::vector<DetectionResult>> vtResult;
-		if (m_nTaskType != 2)
-			return vtResult;
+		std::vector<std::vector<DetectionResult>> result;
+		if (mTaskType != 2)
+			return result;
 		else
 		{
-			vtResult = pDetection->GetDetectionResults(fIOUThres, fScoreThres);
-			return vtResult;
+			result = mDetection->GetDetectionResults(iouThresh, scoreThresh);
+			return result;
 		}
 	}
 
-	bool AI::GetWholeImageDetectionResults(DetectionResult* arrDetRes, int& nBoxes, float fIOUThres, float fScoreThres)
+	bool AI::GetWholeImageDetectionResults(DetectionResult* detResArr, int& boxNum, float iouThresh, float scoreThresh)
 	{
-		if (m_nTaskType != 2)
+		if (mTaskType != 2)
 			return false;
 		else
 		{
-			bool bRes = pDetection->GetWholeImageDetectionResultsTest(arrDetRes, nBoxes, fIOUThres, fScoreThres);
+			bool bRes = mDetection->GetWholeImageDetectionResultsSingleOutput(detResArr, boxNum, iouThresh, scoreThresh);
 			return bRes;
 		}
 	}
 
-	bool AI::GetWholeImageSegmentationResults(unsigned char* pImg, int nClsNo)
+	bool AI::GetWholeImageSegmentationResults(unsigned char* outputImg, int clsNo)
 	{
-		if (m_nTaskType != 1)
+		if (mTaskType != 1)
 			return false;
 		else
 		{
-			bool bRes = pSegmentation->GetWholeImageSegmentationResults(pImg, nClsNo);
+			bool bRes = mSegmentation->GetWholeImageSegmentationResults(outputImg, clsNo);
 			return bRes;
 		}
 	}
@@ -309,16 +309,16 @@ namespace TFTool
 	bool AI::IsModelLoaded()
 	{
 		bool bRes = false;
-		switch (m_nTaskType)
+		switch (mTaskType)
 		{
 		case 0://classification
-			bRes = pClassification->IsModelLoaded();
+			bRes = mClassification->IsModelLoaded();
 			break;
 		case 1://segmentation
-			bRes = pSegmentation->IsModelLoaded();
+			bRes = mSegmentation->IsModelLoaded();
 			break;
 		case 2://detection
-			bRes = pDetection->IsModelLoaded();
+			bRes = mDetection->IsModelLoaded();
 			break;
 		}
 		return bRes;
@@ -326,37 +326,37 @@ namespace TFTool
 
 	long long** AI::GetInputDims()
 	{
-		long long** pDims = NULL;
-		switch (m_nTaskType)
+		long long** dims = NULL;
+		switch (mTaskType)
 		{
 		case 0://classification
-			pDims = pClassification->GetInputDims();
+			dims = mClassification->GetInputDims();
 			break;
 		case 1://segmentation
-			pDims = pSegmentation->GetInputDims();
+			dims = mSegmentation->GetInputDims();
 			break;
 		case 2://detection
-			pDims = pDetection->GetInputDims();
+			dims = mDetection->GetInputDims();
 			break;
 		}
-		return pDims;
+		return dims;
 	}
 
 	long long** AI::GetOutputDims()
 	{
-		long long** pDims = NULL;
-		switch (m_nTaskType)
+		long long** dims = NULL;
+		switch (mTaskType)
 		{
 		case 0://classification
-			pDims = pClassification->GetOutputDims();
+			dims = mClassification->GetOutputDims();
 			break;
 		case 1://segmentation
-			pDims = pSegmentation->GetOutputDims();
+			dims = mSegmentation->GetOutputDims();
 			break;
 		case 2://detection
-			pDims = pDetection->GetOutputDims();
+			dims = mDetection->GetOutputDims();
 			break;
 		}
-		return pDims;
+		return dims;
 	}
 }

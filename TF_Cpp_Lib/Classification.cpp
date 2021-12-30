@@ -16,97 +16,97 @@ bool Classification::LoadEnsembleModel(std::vector<const char*> vtModelPath, std
 	{
 		LoadModel(*it, vtInputOpNames, vtOutputOpNames);
 	}
-	m_ModelPath = "";//vtModelPath
-	m_RunOptions = TF_NewBufferFromString("", 0);
-	m_SessionOptions = TF_NewSessionOptions();
-	m_Graph = TF_NewGraph();
-	m_Status = TF_NewStatus();
-	m_MetaGraph = TF_NewBuffer();
-	m_Session = TF_NewSession(m_Graph, m_SessionOptions, m_Status);//Session --> 2GB
-	const char* tag = "serve";
-	m_Session = TF_LoadSessionFromSavedModel(m_SessionOptions, m_RunOptions, m_ModelPath, &tag, 1, m_Graph, m_MetaGraph, m_Status);//Session --> ~10GB
+	mModelPath = "";//vtModelPath
+	mRunOptions = TF_NewBufferFromString("", 0);
+	mSessionOptions = TF_NewSessionOptions();
+	mGraph = TF_NewGraph();
+	mStatus = TF_NewStatus();
+	mMetaGraph = TF_NewBuffer();
+	mSession = TF_NewSession(mGraph, mSessionOptions, mStatus);//Session --> 2GB
+	const char* TAG = "serve";
+	mSession = TF_LoadSessionFromSavedModel(mSessionOptions, mRunOptions, mModelPath, &TAG, 1, mGraph, mMetaGraph, mStatus);//Session --> ~10GB
 
-	m_nInputOps = (int)vtInputOpNames.size();
-	m_nOutputOps = (int)vtOutputOpNames.size();
+	mInputOpNum = (int)vtInputOpNames.size();
+	mOutputOpNum = (int)vtOutputOpNames.size();
 
-	if (TF_GetCode(m_Status) != TF_OK)
+	if (TF_GetCode(mStatus) != TF_OK)
 	{
-		std::cout << "m_Status : " << TF_Message(m_Status) << std::endl;
+		std::cout << "mStatus : " << TF_Message(mStatus) << std::endl;
 		return false;
 	}
 
-	m_arrInputOps = new TF_Output[m_nInputOps];
-	m_arrOutputOps = new TF_Output[m_nOutputOps];
-	m_nInputDims = new int[m_nInputOps];
-	m_nOutputDims = new int[m_nOutputOps];
-	m_InputDims = new long long*[m_nInputOps];
-	m_OutputDims = new long long*[m_nOutputOps];
-	m_InputDataSizePerBatch = new std::size_t[m_nInputOps];
-	m_OutputDataSizePerBatch = new std::size_t[m_nOutputOps];
+	mInputOpsArr = new TF_Output[mInputOpNum];
+	mOutputOpsArr = new TF_Output[mOutputOpNum];
+	mInputDims = new int[mInputOpNum];
+	mOutputDims = new int[mOutputOpNum];
+	mInputDimsArr = new long long*[mInputOpNum];
+	mOutputDimsArr = new long long*[mOutputOpNum];
+	mInputDataSizePerBatch = new std::size_t[mInputOpNum];
+	mOutputDataSizePerBatch = new std::size_t[mOutputOpNum];
 
-	for (int i = 0; i < m_nInputOps; ++i)
+	for (int i = 0; i < mInputOpNum; ++i)
 	{
-		TF_Operation* InputOp = TF_GraphOperationByName(m_Graph, vtInputOpNames[i]);
-		if (InputOp == nullptr)
+		TF_Operation* inputOp = TF_GraphOperationByName(mGraph, vtInputOpNames[i]);
+		if (inputOp == nullptr)
 		{
 			std::cout << "Failed to find graph operation" << std::endl;
 			return false;
 		}
-		m_arrInputOps[i] = TF_Output{ InputOp, 0 };
-		m_nInputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrInputOps[0], m_Status);
-		int64_t* InputShape = new int64_t[m_nInputDims[i]];
-		TF_GraphGetTensorShape(m_Graph, m_arrInputOps[0], InputShape, m_nInputDims[i], m_Status);
-		m_InputDims[i] = new long long[m_nInputDims[i]];
-		m_InputDims[i][0] = static_cast<long long>(1);
-		for (int j = 1; j < m_nInputDims[i]; ++j) m_InputDims[i][j] = static_cast<long long>(InputShape[j]);
-		m_InputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(m_arrInputOps[i]));
-		for (int j = 1; j < m_nInputDims[i]; ++j) m_InputDataSizePerBatch[i] = m_InputDataSizePerBatch[i] * static_cast<int>(InputShape[j]);
-		delete[] InputShape;
+		mInputOpsArr[i] = TF_Output{ inputOp, 0 };
+		mInputDims[i] = TF_GraphGetTensorNumDims(mGraph, mInputOpsArr[0], mStatus);
+		int64_t* inputShape = new int64_t[mInputDims[i]];
+		TF_GraphGetTensorShape(mGraph, mInputOpsArr[0], inputShape, mInputDims[i], mStatus);
+		mInputDimsArr[i] = new long long[mInputDims[i]];
+		mInputDimsArr[i][0] = static_cast<long long>(1);
+		for (int j = 1; j < mInputDims[i]; ++j) mInputDimsArr[i][j] = static_cast<long long>(inputShape[j]);
+		mInputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(mInputOpsArr[i]));
+		for (int j = 1; j < mInputDims[i]; ++j) mInputDataSizePerBatch[i] = mInputDataSizePerBatch[i] * static_cast<int>(inputShape[j]);
+		delete[] inputShape;
 	}
 
-	for (int i = 0; i < m_nOutputOps; ++i)
+	for (int i = 0; i < mOutputOpNum; ++i)
 	{
-		TF_Operation* OutputOp = TF_GraphOperationByName(m_Graph, vtOutputOpNames[i]);
-		if (OutputOp == nullptr)
+		TF_Operation* outputOp = TF_GraphOperationByName(mGraph, vtOutputOpNames[i]);
+		if (outputOp == nullptr)
 		{
 			std::cout << "Failed to find graph operation" << std::endl;
 			return false;
 		}
-		m_arrOutputOps[i] = TF_Output{ OutputOp, 0 };
-		m_nOutputDims[i] = TF_GraphGetTensorNumDims(m_Graph, m_arrOutputOps[0], m_Status);
-		int64_t* OutputShape = new int64_t[m_nOutputDims[i]];
-		TF_GraphGetTensorShape(m_Graph, m_arrOutputOps[0], OutputShape, m_nOutputDims[i], m_Status);
-		m_OutputDims[i] = new long long[m_nOutputDims[i]];
-		m_OutputDims[i][0] = static_cast<long long>(1);
-		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDims[i][j] = static_cast<long long>(OutputShape[j]);
-		m_OutputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(m_arrOutputOps[0]));
-		for (int j = 1; j < m_nOutputDims[i]; ++j) m_OutputDataSizePerBatch[i] = m_OutputDataSizePerBatch[i] * static_cast<int>(OutputShape[j]);
-		delete[] OutputShape;
+		mOutputOpsArr[i] = TF_Output{ outputOp, 0 };
+		mOutputDims[i] = TF_GraphGetTensorNumDims(mGraph, mOutputOpsArr[0], mStatus);
+		int64_t* outputShape = new int64_t[mOutputDims[i]];
+		TF_GraphGetTensorShape(mGraph, mOutputOpsArr[0], outputShape, mOutputDims[i], mStatus);
+		mOutputDimsArr[i] = new long long[mOutputDims[i]];
+		mOutputDimsArr[i][0] = static_cast<long long>(1);
+		for (int j = 1; j < mOutputDims[i]; ++j) mOutputDimsArr[i][j] = static_cast<long long>(outputShape[j]);
+		mOutputDataSizePerBatch[i] = TF_DataTypeSize(TF_OperationOutputType(mOutputOpsArr[0]));
+		for (int j = 1; j < mOutputDims[i]; ++j) mOutputDataSizePerBatch[i] = mOutputDataSizePerBatch[i] * static_cast<int>(outputShape[j]);
+		delete[] outputShape;
 	}
-		
-	m_bModelLoaded = true;
+
+	mIsModelLoaded = true;
 	return true;
 }
 
 bool Classification::GetOutput(float*** pClassificationResultArray)
 {
-	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)//output operator 갯수 iteration
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)//output operator 갯수 iteration
 	{
-		int nPreBatch = 0;
-		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)//Tensor iteration
+		int preBatch = 0;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)//Tensor iteration
 		{
-			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
-			int nClass = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1);
-			float *output = new float[nBatch * nClass];
-			std::memcpy(output, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nClass * sizeof(float));
-			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int cls = (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *output = new float[batch * cls];
+			std::memcpy(output, TF_TensorData(mOutputTensors[opsIdx][i]), batch * cls * sizeof(float));
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
-				for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+				for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 				{
-					pClassificationResultArray[opsIdx][nPreBatch + batchIdx][clsIdx] = output[batchIdx * nClass + clsIdx];
+					pClassificationResultArray[opsIdx][preBatch + batchIdx][clsIdx] = output[batchIdx * cls + clsIdx];
 				}
 			}
-			nPreBatch += nBatch;
+			preBatch += batch;
 		}
 	}
 	return true;
@@ -114,139 +114,139 @@ bool Classification::GetOutput(float*** pClassificationResultArray)
 
 std::vector<std::vector<float>> Classification::GetOutputByOpIndex(int nOutputOpIndex)
 {
-	std::vector<std::vector<std::vector<float>>> vtResult;
-	std::vector<std::vector<float>> vtResultOp;
-	for (int i = 0; i < m_vtOutputTensors[nOutputOpIndex].size(); ++i)
+	std::vector<std::vector<std::vector<float>>> result;
+	std::vector<std::vector<float>> resultOp;
+	for (int i = 0; i < mOutputTensors[nOutputOpIndex].size(); ++i)
 	{
-		int nBatch = (int)TF_Dim(m_vtOutputTensors[nOutputOpIndex][i], 0);
-		int nClass = (int)TF_Dim(m_vtOutputTensors[nOutputOpIndex][i], 1);
-		float *output = new float[nBatch * nClass];
-		std::memcpy(output, TF_TensorData(m_vtOutputTensors[nOutputOpIndex][i]), nBatch * nClass * sizeof(float));
-		for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+		int batch = (int)TF_Dim(mOutputTensors[nOutputOpIndex][i], 0);
+		int cls = (int)TF_Dim(mOutputTensors[nOutputOpIndex][i], 1);
+		float *output = new float[batch * cls];
+		std::memcpy(output, TF_TensorData(mOutputTensors[nOutputOpIndex][i]), batch * cls * sizeof(float));
+		for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 		{
-			std::vector<float> vtSoftMax;
-			for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+			std::vector<float> softMax;
+			for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 			{
-				vtSoftMax.push_back(output[batchIdx * nClass + clsIdx]);
+				softMax.push_back(output[batchIdx * cls + clsIdx]);
 			}
-			vtResultOp.push_back(vtSoftMax);
+			resultOp.push_back(softMax);
 		}
 	}
-	vtResult.push_back(vtResultOp);
-	return vtResult[0];
+	result.push_back(resultOp);
+	return result[0];
 }
 
 std::vector<std::vector<int>> Classification::GetPredCls(float fThresh)
 {
-	std::vector<std::vector<int>> vtResult;
-	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+	std::vector<std::vector<int>> result;
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)
 	{
-		std::vector<int> vtResultOp;
-		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)
+		std::vector<int> resultOp;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)
 		{
-			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
-			int nClass = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1);
-			float *output = new float[nBatch * nClass];
-			std::memcpy(output, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nClass * sizeof(float));
-			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int cls = (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *output = new float[batch * cls];
+			std::memcpy(output, TF_TensorData(mOutputTensors[opsIdx][i]), batch * cls * sizeof(float));
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
 				int nMaxIndex = -1;
 				float fMaxValue = 0;
-				for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+				for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 				{
-					if ((output[batchIdx * nClass + clsIdx] > fThresh) && (output[batchIdx * nClass + clsIdx] > fMaxValue))
+					if ((output[batchIdx * cls + clsIdx] > fThresh) && (output[batchIdx * cls + clsIdx] > fMaxValue))
 					{
 						nMaxIndex = clsIdx;
-						fMaxValue = output[batchIdx * nClass + clsIdx];
+						fMaxValue = output[batchIdx * cls + clsIdx];
 					}
 				}
-				vtResultOp.push_back(nMaxIndex);
+				resultOp.push_back(nMaxIndex);
 			}
 		}
-		vtResult.push_back(vtResultOp);
+		result.push_back(resultOp);
 	}
-	return vtResult;
+	return result;
 }
 
 std::vector<int> Classification::GetPredClsByOpIndex(float fThresh, int nOutputOpIndex)
 {
-	std::vector<int> vtResult;
-	for (int i = 0; i < m_vtOutputTensors[nOutputOpIndex].size(); ++i)
+	std::vector<int> result;
+	for (int i = 0; i < mOutputTensors[nOutputOpIndex].size(); ++i)
 	{
-		int nBatch = (int)TF_Dim(m_vtOutputTensors[nOutputOpIndex][i], 0);
-		int nClass = (int)TF_Dim(m_vtOutputTensors[nOutputOpIndex][i], 1);
-		float *output = new float[nBatch * nClass];
-		std::memcpy(output, TF_TensorData(m_vtOutputTensors[nOutputOpIndex][i]), nBatch * nClass * sizeof(float));
-		for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+		int batch = (int)TF_Dim(mOutputTensors[nOutputOpIndex][i], 0);
+		int cls = (int)TF_Dim(mOutputTensors[nOutputOpIndex][i], 1);
+		float *output = new float[batch * cls];
+		std::memcpy(output, TF_TensorData(mOutputTensors[nOutputOpIndex][i]), batch * cls * sizeof(float));
+		for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 		{
 			int nMaxIndex = -1;
 			float fMaxValue = 0;
-			for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+			for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 			{
-				if ((output[batchIdx * nClass + clsIdx] > fThresh) && (output[batchIdx * nClass + clsIdx] > fMaxValue))
+				if ((output[batchIdx * cls + clsIdx] > fThresh) && (output[batchIdx * cls + clsIdx] > fMaxValue))
 				{
 					nMaxIndex = clsIdx;
-					fMaxValue = output[batchIdx * nClass + clsIdx];
+					fMaxValue = output[batchIdx * cls + clsIdx];
 				}
 			}
-			vtResult.push_back(nMaxIndex);
+			result.push_back(nMaxIndex);
 		}
 	}
-	return vtResult;
+	return result;
 }
 
 void Classification::GetPredClsAndSftmx(std::vector<std::vector<int>>& vtPredCls, std::vector<std::vector<float>>& vtSftmx, float fThresh)
 {
-	for (int opsIdx = 0; opsIdx < m_nOutputOps; ++opsIdx)
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)
 	{
-		std::vector<int> vtPredClsOp;
-		std::vector<float> vtSftmxOp;
-		for (int i = 0; i < m_vtOutputTensors[opsIdx].size(); ++i)
+		std::vector<int> predClsOp;
+		std::vector<float> sftmxOp;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)
 		{
-			int nBatch = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 0);
-			int nClass = (int)TF_Dim(m_vtOutputTensors[opsIdx][i], 1);
-			float *output = new float[nBatch * nClass];
-			std::memcpy(output, TF_TensorData(m_vtOutputTensors[opsIdx][i]), nBatch * nClass * sizeof(float));
-			for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int cls = (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *output = new float[batch * cls];
+			std::memcpy(output, TF_TensorData(mOutputTensors[opsIdx][i]), batch * cls * sizeof(float));
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
 				int nMaxIndex = -1;
 				float fMaxValue = 0;
-				for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+				for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 				{
-					if ((output[batchIdx * nClass + clsIdx] > fThresh) && (output[batchIdx * nClass + clsIdx] > fMaxValue))
+					if ((output[batchIdx * cls + clsIdx] > fThresh) && (output[batchIdx * cls + clsIdx] > fMaxValue))
 					{
 						nMaxIndex = clsIdx;
-						fMaxValue = output[batchIdx * nClass + clsIdx];
+						fMaxValue = output[batchIdx * cls + clsIdx];
 					}
 				}
-				vtPredClsOp.push_back(nMaxIndex);
-				vtSftmxOp.push_back(fMaxValue);
+				predClsOp.push_back(nMaxIndex);
+				sftmxOp.push_back(fMaxValue);
 			}
 		}
-		vtPredCls.push_back(vtPredClsOp);
-		vtSftmx.push_back(vtSftmxOp);
+		vtPredCls.push_back(predClsOp);
+		vtSftmx.push_back(sftmxOp);
 	}
 	return;
 }
 
 void Classification::GetPredClsAndSftmxByOpIndex(std::vector<int>& vtPredCls, std::vector<float>& vtSftmx, float fThresh, int nOutputOpIndex)
 {
-	for (int i = 0; i < m_vtOutputTensors[nOutputOpIndex].size(); ++i)
+	for (int i = 0; i < mOutputTensors[nOutputOpIndex].size(); ++i)
 	{
-		int nBatch = (int)TF_Dim(m_vtOutputTensors[nOutputOpIndex][i], 0);
-		int nClass = (int)TF_Dim(m_vtOutputTensors[nOutputOpIndex][i], 1);
-		float *output = new float[nBatch * nClass];
-		std::memcpy(output, TF_TensorData(m_vtOutputTensors[nOutputOpIndex][i]), nBatch * nClass * sizeof(float));
-		for (int batchIdx = 0; batchIdx < nBatch; ++batchIdx)
+		int batch = (int)TF_Dim(mOutputTensors[nOutputOpIndex][i], 0);
+		int cls = (int)TF_Dim(mOutputTensors[nOutputOpIndex][i], 1);
+		float *output = new float[batch * cls];
+		std::memcpy(output, TF_TensorData(mOutputTensors[nOutputOpIndex][i]), batch * cls * sizeof(float));
+		for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 		{
 			int nMaxIndex = -1;
 			float fMaxValue = 0;
-			for (int clsIdx = 0; clsIdx < nClass; ++clsIdx)
+			for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 			{
-				if ((output[batchIdx * nClass + clsIdx] > fThresh) && (output[batchIdx * nClass + clsIdx] > fMaxValue))
+				if ((output[batchIdx * cls + clsIdx] > fThresh) && (output[batchIdx * cls + clsIdx] > fMaxValue))
 				{
 					nMaxIndex = clsIdx;
-					fMaxValue = output[batchIdx * nClass + clsIdx];
+					fMaxValue = output[batchIdx * cls + clsIdx];
 				}
 			}
 			vtPredCls.push_back(nMaxIndex);

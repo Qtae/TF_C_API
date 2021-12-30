@@ -40,7 +40,6 @@ int main()
 	ImageSet[2] = Image3f;
 	ImageSet[3] = Image4f;
 
-	
 	std::vector<const char*> vtInputOpNames;
 	std::vector<const char*> vtOutputOpNames;
 	vtInputOpNames.push_back("serving_default_input_1:0");
