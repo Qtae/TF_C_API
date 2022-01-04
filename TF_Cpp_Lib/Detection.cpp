@@ -403,7 +403,6 @@ bool Detection::GetWholeImageDetectionResultsSingleOutput(DetectionResult* detRe
 {
 	//Suppose there is only one output operation in detection tasks.
 	std::vector<DetectionResult> result;
-	int batch = (int)mOutputDimsArr[0][0];
 	int gridX = (int)mOutputDimsArr[0][1];
 	int gridY = (int)mOutputDimsArr[0][2];
 	int anchorNum = (int)mOutputDimsArr[0][3];
@@ -419,6 +418,7 @@ bool Detection::GetWholeImageDetectionResultsSingleOutput(DetectionResult* detRe
 	
 	for (int i = 0; i < mOutputTensors[0].size(); ++i)//Tensor iteration
 	{
+		int batch = (int)TF_Dim(mOutputTensors[0][i], 0);
 		float *output = new float[batch * gridX * gridY * anchorNum * (clsNum * 2 + 6)];
 		std::memcpy(output, TF_TensorData(mOutputTensors[0][i]), batch * gridX * gridY * anchorNum * (clsNum * 2 + 6) * sizeof(float));
 		

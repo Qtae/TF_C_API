@@ -851,7 +851,7 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 	return true;
 }
 
-bool TFCore::Run(float*** inputImgArr, int nBatch, bool bNormalize)
+bool TFCore::Run(float*** inputImgArr, int batch, bool bNormalize)
 {
 	if (!mIsModelLoaded)
 	{
@@ -884,13 +884,13 @@ bool TFCore::Run(float*** inputImgArr, int nBatch, bool bNormalize)
 
 	auto const dealloc = [](void*, std::size_t, void*) {};
 
-	int nBatchIter = imgNum / nBatch + (int)(bool)(imgNum % nBatch);
+	int batchIter = imgNum / batch + (int)(bool)(imgNum % batch);
 
-	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 	{
-		int nCurrBatch = nBatch;
-		if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-			nCurrBatch = imgNum % nBatch;
+		int nCurrBatch = batch;
+		if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+			nCurrBatch = imgNum % batch;
 		for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
 		{
 			float *imgData = new float[nCurrBatch * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3]];
@@ -902,7 +902,7 @@ bool TFCore::Run(float*** inputImgArr, int nBatch, bool bNormalize)
 					{
 						for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
 						{
-							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = inputImgArr[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] / float(255.);
+							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = inputImgArr[batchIdx * batch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] / float(255.);
 						}
 					}
 				}
@@ -915,7 +915,7 @@ bool TFCore::Run(float*** inputImgArr, int nBatch, bool bNormalize)
 					{
 						for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
 						{
-							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = inputImgArr[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx];
+							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = inputImgArr[batchIdx * batch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx];
 						}
 					}
 				}
@@ -965,7 +965,7 @@ bool TFCore::Run(float*** inputImgArr, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(float** inputImgArr, int nBatch, bool bNormalize)
+bool TFCore::Run(float** inputImgArr, int batch, bool bNormalize)
 {
 	if (!mIsModelLoaded)
 	{
@@ -998,13 +998,13 @@ bool TFCore::Run(float** inputImgArr, int nBatch, bool bNormalize)
 
 	auto const dealloc = [](void*, std::size_t, void*) {};
 
-	int nBatchIter = imgNum / nBatch + (int)(bool)(imgNum % nBatch);
+	int batchIter = imgNum / batch + (int)(bool)(imgNum % batch);
 
-	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 	{
-		int nCurrBatch = nBatch;
-		if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-			nCurrBatch = imgNum % nBatch;
+		int nCurrBatch = batch;
+		if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+			nCurrBatch = imgNum % batch;
 
 		float* imgData = new float[nCurrBatch * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3]];
 		if (bNormalize)
@@ -1015,7 +1015,7 @@ bool TFCore::Run(float** inputImgArr, int nBatch, bool bNormalize)
 				{
 					for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
 					{
-						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = inputImgArr[batchIdx * nBatch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx] / float(255.);
+						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = inputImgArr[batchIdx * batch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx] / float(255.);
 					}
 				}
 			}
@@ -1028,7 +1028,7 @@ bool TFCore::Run(float** inputImgArr, int nBatch, bool bNormalize)
 				{
 					for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
 					{
-						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = inputImgArr[batchIdx * nBatch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx];
+						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = inputImgArr[batchIdx * batch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx];
 					}
 				}
 			}
@@ -1073,7 +1073,7 @@ bool TFCore::Run(float** inputImgArr, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char*** inputImgArr, int nBatch, bool bNormalize)
+bool TFCore::Run(unsigned char*** inputImgArr, int batch, bool bNormalize)
 {
 	if (!mIsModelLoaded)
 	{
@@ -1106,13 +1106,13 @@ bool TFCore::Run(unsigned char*** inputImgArr, int nBatch, bool bNormalize)
 
 	auto const dealloc = [](void*, std::size_t, void*) {};
 
-	int nBatchIter = imgNum / nBatch + (int)(bool)(imgNum % nBatch);
+	int batchIter = imgNum / batch + (int)(bool)(imgNum % batch);
 
-	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 	{
-		int nCurrBatch = nBatch;
-		if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-			nCurrBatch = imgNum % nBatch;
+		int nCurrBatch = batch;
+		if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+			nCurrBatch = imgNum % batch;
 		for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
 		{
 			float *imgData = new float[nCurrBatch * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3]];
@@ -1124,7 +1124,7 @@ bool TFCore::Run(unsigned char*** inputImgArr, int nBatch, bool bNormalize)
 					{
 						for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
 						{
-							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = (float)(inputImgArr[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx]) / (float)(255.);
+							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = (float)(inputImgArr[batchIdx * batch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx]) / (float)(255.);
 						}
 					}
 				}
@@ -1137,7 +1137,7 @@ bool TFCore::Run(unsigned char*** inputImgArr, int nBatch, bool bNormalize)
 					{
 						for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
 						{
-							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = (float)(inputImgArr[batchIdx * nBatch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx]);
+							imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = (float)(inputImgArr[batchIdx * batch + dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx]);
 						}
 					}
 				}
@@ -1187,7 +1187,7 @@ bool TFCore::Run(unsigned char*** inputImgArr, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** inputImgArr, int nBatch, bool bNormalize)
+bool TFCore::Run(unsigned char** inputImgArr, int batch, bool bNormalize)
 {
 	if (!mIsModelLoaded)
 	{
@@ -1220,13 +1220,13 @@ bool TFCore::Run(unsigned char** inputImgArr, int nBatch, bool bNormalize)
 
 	auto const dealloc = [](void*, std::size_t, void*) {};
 
-	int nBatchIter = imgNum / nBatch + (int)(bool)(imgNum % nBatch);
+	int batchIter = imgNum / batch + (int)(bool)(imgNum % batch);
 
-	for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+	for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 	{
-		int nCurrBatch = nBatch;
-		if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-			nCurrBatch = imgNum % nBatch;
+		int nCurrBatch = batch;
+		if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+			nCurrBatch = imgNum % batch;
 
 		float* imgData = new float[nCurrBatch * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3]];
 		if (bNormalize)
@@ -1237,7 +1237,7 @@ bool TFCore::Run(unsigned char** inputImgArr, int nBatch, bool bNormalize)
 				{
 					for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
 					{
-						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = (float)(inputImgArr[batchIdx * nBatch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx]) / (float)(255.);
+						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = (float)(inputImgArr[batchIdx * batch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx]) / (float)(255.);
 					}
 				}
 			}
@@ -1250,7 +1250,7 @@ bool TFCore::Run(unsigned char** inputImgArr, int nBatch, bool bNormalize)
 				{
 					for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
 					{
-						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = (float)(inputImgArr[batchIdx * nBatch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx]);
+						imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = (float)(inputImgArr[batchIdx * batch + dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx]);
 					}
 				}
 			}
@@ -1295,7 +1295,7 @@ bool TFCore::Run(unsigned char** inputImgArr, int nBatch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, int nBatch, bool bNormalize, bool bConvertGrayToColor)
+bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, int batch, bool bNormalize, bool bConvertGrayToColor)
 //VisionWorks image input format, has only one input operator
 {
 	if (!mIsModelLoaded)
@@ -1344,22 +1344,22 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 
 	int imgNum = itX * itY;
 	int nImageChannel = (int)(mInputDimsArr[0][3]);
-	int nBatchIter = imgNum / nBatch + (int)(bool)(imgNum % nBatch);
+	int batchIter = imgNum / batch + (int)(bool)(imgNum % batch);
 
 	if (bConvertGrayToColor)
 	{
 		if (bNormalize)
 		{
-			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 			{
-				int nCurrBatch = nBatch;
-				if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-					nCurrBatch = imgNum % nBatch;
+				int nCurrBatch = batch;
+				if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+					nCurrBatch = imgNum % batch;
 
 				float* imgData = new float[nCurrBatch * mInputDimsArr[0][1] * mInputDimsArr[0][2] * nImageChannel];
 				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 				{
-					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrImgIdx = batchIdx * batch + dataIdx;
 					int nCurrXIdx = nCurrImgIdx % itX;
 					int nCurrYIdx = nCurrImgIdx / itX;
 
@@ -1420,16 +1420,16 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 		}
 		else
 		{
-			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 			{
-				int nCurrBatch = nBatch;
-				if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-					nCurrBatch = imgNum % nBatch;
+				int nCurrBatch = batch;
+				if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+					nCurrBatch = imgNum % batch;
 
 				float* imgData = new float[nCurrBatch * mInputDimsArr[0][1] * mInputDimsArr[0][2] * nImageChannel];
 				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 				{
-					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrImgIdx = batchIdx * batch + dataIdx;
 					int nCurrXIdx = nCurrImgIdx % itX;
 					int nCurrYIdx = nCurrImgIdx / itX;
 
@@ -1493,16 +1493,16 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 	{
 		if (bNormalize)
 		{
-			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 			{
-				int nCurrBatch = nBatch;
-				if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-					nCurrBatch = imgNum % nBatch;
+				int nCurrBatch = batch;
+				if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+					nCurrBatch = imgNum % batch;
 
 				float* imgData = new float[nCurrBatch * mInputDimsArr[0][1] * mInputDimsArr[0][2] * nImageChannel];
 				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 				{
-					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrImgIdx = batchIdx * batch + dataIdx;
 					int nCurrXIdx = nCurrImgIdx % itX;
 					int nCurrYIdx = nCurrImgIdx / itX;
 
@@ -1563,16 +1563,16 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 		}
 		else
 		{
-			for (int batchIdx = 0; batchIdx < nBatchIter; ++batchIdx)
+			for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 			{
-				int nCurrBatch = nBatch;
-				if ((batchIdx == nBatchIter - 1) && (imgNum % nBatch != 0))
-					nCurrBatch = imgNum % nBatch;
+				int nCurrBatch = batch;
+				if ((batchIdx == batchIter - 1) && (imgNum % batch != 0))
+					nCurrBatch = imgNum % batch;
 
 				float* imgData = new float[nCurrBatch * mInputDimsArr[0][1] * mInputDimsArr[0][2] * nImageChannel];
 				for (int dataIdx = 0; dataIdx < nCurrBatch; ++dataIdx)
 				{
-					int nCurrImgIdx = batchIdx * nBatch + dataIdx;
+					int nCurrImgIdx = batchIdx * batch + dataIdx;
 					int nCurrXIdx = nCurrImgIdx % itX;
 					int nCurrYIdx = nCurrImgIdx / itX;
 
