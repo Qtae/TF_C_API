@@ -881,11 +881,11 @@ bool TFCore::Run(float*** inputImgArr, int batch, bool bNormalize)
 		std::vector<TF_Tensor*> vt;
 		mOutputTensors.push_back(vt);
 	}
-
+	
 	auto const dealloc = [](void*, std::size_t, void*) {};
-
+	
 	int batchIter = imgNum / batch + (int)(bool)(imgNum % batch);
-
+	
 	for (int batchIdx = 0; batchIdx < batchIter; ++batchIdx)
 	{
 		int nCurrBatch = batch;

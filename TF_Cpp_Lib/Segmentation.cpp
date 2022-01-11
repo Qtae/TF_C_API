@@ -121,6 +121,8 @@ bool Segmentation::GetWholeImageSegmentationResults(unsigned char* outputImg, in
 	int currYIdx = 0;
 	int currImgIdx = 0;
 
+	int originalBatch = (int)TF_Dim(mOutputTensors[0][0], 0);
+
 	for (int i = 0; i < mOutputTensors[0].size(); ++i)//Tensor iteration
 	{
 		int batch = (int)TF_Dim(mOutputTensors[0][i], 0);
@@ -129,7 +131,7 @@ bool Segmentation::GetWholeImageSegmentationResults(unsigned char* outputImg, in
 
 		for (int imgIdx = 0; imgIdx < batch; ++imgIdx)//Image in tensor iteration
 		{
-			currImgIdx = i * batch + imgIdx;
+			currImgIdx = i * originalBatch + imgIdx;
 			currXIdx = currImgIdx % itX;
 			currYIdx = currImgIdx / itX;
 			int xOffset = (mCropSize.x - mOverlapSize.x) * currXIdx;
