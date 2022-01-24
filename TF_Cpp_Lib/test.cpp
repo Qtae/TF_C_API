@@ -18,7 +18,7 @@ int main()
 	cv::cvtColor(Image2, Image2, cv::COLOR_BGR2RGB);
 	cv::cvtColor(Image3, Image3, cv::COLOR_BGR2RGB);
 	cv::cvtColor(Image4, Image4, cv::COLOR_BGR2RGB);
-	Mat Mat1(640, 640, CV_32FC1);
+	Mat Mat1(640, 640, CV_32FC(3));
 	Mat Mat2(640, 640, CV_32FC(3));
 	Mat Mat3(640, 640, CV_32FC(3));
 	Mat Mat4(640, 640, CV_32FC(3));
@@ -49,7 +49,5 @@ int main()
 	TFTool::AI* AI = new TFTool::AI();
 	AI->LoadModel(strModelPath, vtInputOpNames, vtOutputOpNames, 2);
 	AI->Run(ImageSet, 2, true); //ImageData, Batch, bNormalize
-	float*** result;
-	AI->GetClassificationResults(result);
 	std::vector<std::vector<DetectionResult>> vtResult = AI->GetDetectionResults(0.3, 0.25);
 }

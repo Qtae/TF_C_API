@@ -174,14 +174,17 @@ bool TFCore::Run(float*** inputImgArr, bool bNormalize)
 
 	for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
 	{
-		float* imgData = new float[imgNum * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2]];
+		float* imgData = new float[imgNum * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3]];
 		if (bNormalize)
 		{
 			for (int dataIdx = 0; dataIdx < imgNum; ++dataIdx)
 			{
 				for (int pixIdx = 0; pixIdx < mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2]; ++pixIdx)
 				{
-					imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] + pixIdx] = inputImgArr[dataIdx][opsIdx][pixIdx] / float(255.);
+					for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
+					{
+						imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = inputImgArr[dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] / float(255.);
+					}
 				}
 			}
 		}
@@ -191,7 +194,10 @@ bool TFCore::Run(float*** inputImgArr, bool bNormalize)
 			{
 				for (int pixIdx = 0; pixIdx < mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2]; ++pixIdx)
 				{
-					imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] + pixIdx] = inputImgArr[dataIdx][opsIdx][pixIdx];
+					for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
+					{
+						imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = inputImgArr[dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx];
+					}
 				}
 			}
 		}
@@ -272,14 +278,17 @@ bool TFCore::Run(float** inputImgArr, bool bNormalize)
 
 	auto const dealloc = [](void*, std::size_t, void*) {};
 
-	float* imgData = new float[imgNum * mInputDimsArr[0][1] * mInputDimsArr[0][2]];
+	float* imgData = new float[imgNum * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3]];
 	if (bNormalize)
 	{
 		for (int dataIdx = 0; dataIdx < imgNum; ++dataIdx)
 		{
 			for (int pixIdx = 0; pixIdx < mInputDimsArr[0][1] * mInputDimsArr[0][2]; ++pixIdx)
 			{
-				imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] + pixIdx] = inputImgArr[dataIdx][pixIdx] / float(255.);
+				for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
+				{
+					imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = inputImgArr[dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx] / float(255.);
+				}
 			}
 		}
 	}
@@ -289,7 +298,10 @@ bool TFCore::Run(float** inputImgArr, bool bNormalize)
 		{
 			for (int pixIdx = 0; pixIdx < mInputDimsArr[0][1] * mInputDimsArr[0][2]; ++pixIdx)
 			{
-				imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] + pixIdx] = inputImgArr[dataIdx][pixIdx];
+				for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
+				{
+					imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = inputImgArr[dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx];
+				}
 			}
 		}
 	}
@@ -368,14 +380,17 @@ bool TFCore::Run(unsigned char*** inputImgArr, bool bNormalize)
 
 	for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
 	{
-		float* imgData = new float[imgNum * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2]];
+		float* imgData = new float[imgNum * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[0][3]];
 		if (bNormalize)
 		{
 			for (int dataIdx = 0; dataIdx < imgNum; ++dataIdx)
 			{
 				for (int pixIdx = 0; pixIdx < mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2]; ++pixIdx)
 				{
-					imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] + pixIdx] = inputImgArr[dataIdx][opsIdx][pixIdx] / float(255.);
+					for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
+					{
+						imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = (float)(inputImgArr[dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx]) / (float)(255.);
+					}
 				}
 			}
 		}
@@ -385,7 +400,10 @@ bool TFCore::Run(unsigned char*** inputImgArr, bool bNormalize)
 			{
 				for (int pixIdx = 0; pixIdx < mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2]; ++pixIdx)
 				{
-					imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] + pixIdx] = inputImgArr[dataIdx][opsIdx][pixIdx];
+					for (int chnIdx = 0; chnIdx < mInputDimsArr[opsIdx][3]; ++chnIdx)
+					{
+						imgData[dataIdx * mInputDimsArr[opsIdx][1] * mInputDimsArr[opsIdx][2] * mInputDimsArr[opsIdx][3] + pixIdx * mInputDimsArr[opsIdx][3] + chnIdx] = (float)(inputImgArr[dataIdx][opsIdx][pixIdx * mInputDimsArr[opsIdx][3] + chnIdx]);
+					}
 				}
 			}
 		}
@@ -467,14 +485,17 @@ bool TFCore::Run(unsigned char** inputImgArr, bool bNormalize)
 
 	auto const dealloc = [](void*, std::size_t, void*) {};
 
-	float* imgData = new float[imgNum * mInputDimsArr[0][1] * mInputDimsArr[0][2]];
+	float* imgData = new float[imgNum * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3]];
 	if (bNormalize)
 	{
 		for (int dataIdx = 0; dataIdx < imgNum; ++dataIdx)
 		{
 			for (int pixIdx = 0; pixIdx < mInputDimsArr[0][1] * mInputDimsArr[0][2]; ++pixIdx)
 			{
-				imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] + pixIdx] = (float)(inputImgArr[dataIdx][pixIdx]) / (float)(255.);
+				for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
+				{
+					imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = (float)(inputImgArr[dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx]) / (float)(255.);
+				}
 			}
 		}
 	}
@@ -484,7 +505,10 @@ bool TFCore::Run(unsigned char** inputImgArr, bool bNormalize)
 		{
 			for (int pixIdx = 0; pixIdx < mInputDimsArr[0][1] * mInputDimsArr[0][2]; ++pixIdx)
 			{
-				imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] + pixIdx] = (float)(inputImgArr[dataIdx][pixIdx]);
+				for (int chnIdx = 0; chnIdx < mInputDimsArr[0][3]; ++chnIdx)
+				{
+					imgData[dataIdx * mInputDimsArr[0][1] * mInputDimsArr[0][2] * mInputDimsArr[0][3] + pixIdx * mInputDimsArr[0][3] + chnIdx] = (float)(inputImgArr[dataIdx][pixIdx * mInputDimsArr[0][3] + chnIdx]);
+				}
 			}
 		}
 	}
