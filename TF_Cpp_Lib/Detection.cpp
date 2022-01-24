@@ -88,21 +88,25 @@ void Detection::ApplyScoreThreshold(std::vector<DetectionResult>& detRes, float 
 std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float iouThresh, float scoreThresh)
 {
 	//Suppose there is only one output operation in detection tasks.
-	std::vector<std::vector<DetectionResult>> result;
-	int batch = (int)mOutputDimsArr[0][0];
 	int gridX = (int)mOutputDimsArr[0][1];
 	int gridY = (int)mOutputDimsArr[0][2];
 	int anchorNum = (int)mOutputDimsArr[0][3];
-	int clsNum = (int)mOutputDimsArr[0][4] - 5;
+	int clsNum = ((int)mOutputDimsArr[0][4] - 6) / 2;
+
+	int originalBatch = (int)TF_Dim(mOutputTensors[0][0], 0);
+
+	std::vector<std::vector<DetectionResult>> result;
 
 	for (int i = 0; i < mOutputTensors[0].size(); ++i)//Tensor iteration
 	{
-		float *output = new float[batch * gridX * gridY * anchorNum * (clsNum + 5)];
-		std::memcpy(output, TF_TensorData(mOutputTensors[0][i]), batch * gridX * gridY * anchorNum * (clsNum + 5) * sizeof(float));
+		int batch = (int)TF_Dim(mOutputTensors[0][i], 0);
+		float *output = new float[batch * gridX * gridY * anchorNum * (clsNum * 2 + 6)];
+		std::memcpy(output, TF_TensorData(mOutputTensors[0][i]), batch * gridX * gridY * anchorNum * (clsNum * 2 + 6) * sizeof(float));
 
-		for (int imgIdx = 0; imgIdx < batch; ++imgIdx)
+		for (int imgIdx = 0; imgIdx < batch; ++imgIdx)//Image in tensor iteration
 		{
-			std::vector<DetectionResult> imgResult;
+			std::vector<DetectionResult> tmpRes;
+			int currImgIdx = i * originalBatch + imgIdx;
 			for (int grdXIdx = 0; grdXIdx < gridX; ++grdXIdx)
 			{
 				for (int grdYIdx = 0; grdYIdx < gridY; ++grdYIdx)
@@ -110,39 +114,39 @@ std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float i
 					for (int ancIdx = 0; ancIdx < anchorNum; ++ancIdx)
 					{
 						DetectionResult detRes;
-						detRes.x = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum + 5) +
-							grdXIdx * gridY * anchorNum * (clsNum + 5) +
-							grdYIdx * anchorNum * (clsNum + 5) +
-							ancIdx * (clsNum + 5) +
+						detRes.x = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
 							0];
-						detRes.y = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum + 5) +
-							grdXIdx * gridY * anchorNum * (clsNum + 5) +
-							grdYIdx * anchorNum * (clsNum + 5) +
-							ancIdx * (clsNum + 5) +
+						detRes.y = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
 							1];
-						detRes.w = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum + 5) +
-							grdXIdx * gridY * anchorNum * (clsNum + 5) +
-							grdYIdx * anchorNum * (clsNum + 5) +
-							ancIdx * (clsNum + 5) +
+						detRes.w = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
 							2];
-						detRes.h = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum + 5) +
-							grdXIdx * gridY * anchorNum * (clsNum + 5) +
-							grdYIdx * anchorNum * (clsNum + 5) +
-							ancIdx * (clsNum + 5) +
+						detRes.h = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
 							3];
-						detRes.Objectness = output[imgIdx * gridX * gridY * anchorNum * (clsNum + 5) +
-							grdXIdx * gridY * anchorNum * (clsNum + 5) +
-							grdYIdx * anchorNum * (clsNum + 5) +
-							ancIdx * (clsNum + 5) +
+						detRes.Objectness = output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
 							4];
 						int bestCls = -1;
 						float score = 0.;
 						for (int clsIdx = 0; clsIdx < clsNum; ++clsIdx)
 						{
-							float currScore = output[imgIdx * gridX * gridY * anchorNum * (clsNum + 5)
-								+ grdXIdx * gridY * anchorNum * (clsNum + 5)
-								+ grdYIdx * anchorNum * (clsNum + 5)
-								+ ancIdx * (clsNum + 5)
+							float currScore = output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6)
+								+ grdXIdx * gridY * anchorNum * (clsNum * 2 + 6)
+								+ grdYIdx * anchorNum * (clsNum * 2 + 6)
+								+ ancIdx * (clsNum * 2 + 6)
 								+ 5 + clsIdx];
 							if (currScore >= score)
 							{
@@ -152,17 +156,119 @@ std::vector<std::vector<DetectionResult>> Detection::GetDetectionResults(float i
 						}
 						detRes.BestClass = bestCls;
 						detRes.Score = score;
-						imgResult.push_back(detRes);
+						tmpRes.push_back(detRes);
 					}
 				}
 			}
-			DoNMS(imgResult, iouThresh, scoreThresh, clsNum);
-
-			result.push_back(imgResult);
+			DoNMS(tmpRes, iouThresh, scoreThresh, clsNum);
+			result.push_back(tmpRes);
 		}
 	}
 
+	for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
+	{
+		for (int tensorIdx = 0; tensorIdx < mOutputTensors[opsIdx].size(); ++tensorIdx)
+		{
+			TF_DeleteTensor(mOutputTensors[opsIdx][tensorIdx]);
+		}
+		mOutputTensors[opsIdx].clear();
+	}
+	mOutputTensors.clear();
+
 	return result;
+}
+
+bool Detection::GetDetectionResults(DetectionResult** detectionResultArr, int* boxNumArr, float iouThresh, float scoreThresh)
+{
+	//Suppose there is only one output operation in detection tasks.
+	int gridX = (int)mOutputDimsArr[0][1];
+	int gridY = (int)mOutputDimsArr[0][2];
+	int anchorNum = (int)mOutputDimsArr[0][3];
+	int clsNum = ((int)mOutputDimsArr[0][4] - 6) / 2;
+
+	int originalBatch = (int)TF_Dim(mOutputTensors[0][0], 0);
+
+	std::vector<std::vector<DetectionResult>> result;
+
+	for (int i = 0; i < mOutputTensors[0].size(); ++i)//Tensor iteration
+	{
+		int batch = (int)TF_Dim(mOutputTensors[0][i], 0);
+		float *output = new float[batch * gridX * gridY * anchorNum * (clsNum * 2 + 6)];
+		std::memcpy(output, TF_TensorData(mOutputTensors[0][i]), batch * gridX * gridY * anchorNum * (clsNum * 2 + 6) * sizeof(float));
+
+		for (int imgIdx = 0; imgIdx < batch; ++imgIdx)//Image in tensor iteration
+		{
+			std::vector<DetectionResult> tmpRes;
+			int currImgIdx = i * originalBatch + imgIdx;
+			for (int grdXIdx = 0; grdXIdx < gridX; ++grdXIdx)
+			{
+				for (int grdYIdx = 0; grdYIdx < gridY; ++grdYIdx)
+				{
+					for (int ancIdx = 0; ancIdx < anchorNum; ++ancIdx)
+					{
+						DetectionResult detRes;
+						detRes.x = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
+							0];
+						detRes.y = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
+							1];
+						detRes.w = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
+							2];
+						detRes.h = (int)output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
+							3];
+						detRes.Objectness = output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdXIdx * gridY * anchorNum * (clsNum * 2 + 6) +
+							grdYIdx * anchorNum * (clsNum * 2 + 6) +
+							ancIdx * (clsNum * 2 + 6) +
+							4];
+						int bestCls = -1;
+						float score = 0.;
+						for (int clsIdx = 0; clsIdx < clsNum; ++clsIdx)
+						{
+							float currScore = output[imgIdx * gridX * gridY * anchorNum * (clsNum * 2 + 6)
+								+ grdXIdx * gridY * anchorNum * (clsNum * 2 + 6)
+								+ grdYIdx * anchorNum * (clsNum * 2 + 6)
+								+ ancIdx * (clsNum * 2 + 6)
+								+ 5 + clsIdx];
+							if (currScore >= score)
+							{
+								bestCls = clsIdx;
+								score = currScore;
+							}
+						}
+						detRes.BestClass = bestCls;
+						detRes.Score = score;
+						tmpRes.push_back(detRes);
+					}
+				}
+			}
+			DoNMS(tmpRes, iouThresh, scoreThresh, clsNum);
+			result.push_back(tmpRes);
+		}
+	}
+
+	for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
+	{
+		for (int tensorIdx = 0; tensorIdx < mOutputTensors[opsIdx].size(); ++tensorIdx)
+		{
+			TF_DeleteTensor(mOutputTensors[opsIdx][tensorIdx]);
+		}
+		mOutputTensors[opsIdx].clear();
+	}
+	mOutputTensors.clear();
+
+	return true;
 }
 
 bool Detection::GetWholeImageDetectionResultsSingleOutput(DetectionResult* detResArr, int& boxNum, float iouThresh, float scoreThresh)

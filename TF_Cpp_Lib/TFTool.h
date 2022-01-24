@@ -145,6 +145,7 @@ namespace TFTool
 
 		//Returns detection result
 		__declspec(dllexport) std::vector<std::vector<DetectionResult>> GetDetectionResults(float iouThresh = 0.5, float scoreThresh = 0.3);
+		__declspec(dllexport) bool GetDetectionResultsByArray(DetectionResult** detectionResultArr, int* boxNumArr, float iouThresh = 0.5, float scoreThresh = 0.3);
 
 		//Return whole image (cropped on run() function) detection result
 		__declspec(dllexport) bool GetWholeImageDetectionResults(DetectionResult* detectionResultArr, int& boxNum, float iouThresh = 0.5, float scoreThresh = 0.3);
