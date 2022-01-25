@@ -140,6 +140,9 @@ namespace TFTool
 		//Returns classification result
 		__declspec(dllexport) std::vector<std::vector<int>> GetClassificationResults(float softmxThresh = 0);
 
+		//Return SortMX value
+		__declspec(dllexport) std::vector<std::vector<std::vector<float>>> GetClassificationSoftMXResults();
+
 		//Returns segmentation result
 		__declspec(dllexport) std::vector<std::vector<float*>> GetSegmentationResults();
 

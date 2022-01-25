@@ -10,10 +10,10 @@ using cv::Vec3f;
 
 int main()
 {
-	Mat Image1 = cv::imread("D:/Work/01_TF_C/test/testtest/1focus-1_h3391w5420.bmp", cv::IMREAD_COLOR);
-	Mat Image2 = cv::imread("D:/Work/01_TF_C/test/testtest/1focus-1_h3391w22060.bmp", cv::IMREAD_COLOR);
-	Mat Image3 = cv::imread("D:/Work/01_TF_C/test/testtest/9_h3436w2860.bmp", cv::IMREAD_COLOR);
-	Mat Image4 = cv::imread("D:/Work/01_TF_C/test/testtest/9_h3436w4780.bmp", cv::IMREAD_COLOR);
+	Mat Image1 = cv::imread("C:/Users/jhchoi/Desktop/VisionWorks/VisionWorks2/image/1_10_crop8.jpg", cv::IMREAD_COLOR);
+	Mat Image2 = cv::imread("C:/Users/jhchoi/Desktop/VisionWorks/VisionWorks2/image/1_10_crop9.jpg", cv::IMREAD_COLOR);
+	Mat Image3 = cv::imread("C:/Users/jhchoi/Desktop/VisionWorks/VisionWorks2/image/1_10_crop43.jpg", cv::IMREAD_COLOR);
+	Mat Image4 = cv::imread("C:/Users/jhchoi/Desktop/VisionWorks/VisionWorks2/image/1_10_crop49.jpg", cv::IMREAD_COLOR);
 	cv::cvtColor(Image1, Image1, cv::COLOR_BGR2RGB);
 	cv::cvtColor(Image2, Image2, cv::COLOR_BGR2RGB);
 	cv::cvtColor(Image3, Image3, cv::COLOR_BGR2RGB);
@@ -44,7 +44,7 @@ int main()
 	std::vector<const char*> vtOutputOpNames;
 	vtInputOpNames.push_back("serving_default_input_1:0");
 	vtOutputOpNames.push_back("StatefulPartitionedCall:1");
-	const char* strModelPath = "D:/Work/01_TF_C/test/yolov4-tflite-train_tf-epoch2000";
+	const char* strModelPath = "C:/WISVision/StitchAI_Modelsc1_yolov4-tflite-train_tf-epoch100";
 
 	TFTool::AI* AI = new TFTool::AI();
 	AI->LoadModel(strModelPath, vtInputOpNames, vtOutputOpNames, 2);

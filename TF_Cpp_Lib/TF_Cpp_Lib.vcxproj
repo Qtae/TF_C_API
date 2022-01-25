@@ -23,7 +23,7 @@
     <ProjectGuid>{9E6A7F2C-EA9D-4DAB-8960-2915953C3430}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TF_Cpp_Lib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
     <ProjectName>TF_Cpp_Lib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -124,12 +124,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)tensorflow\include;D:\Work\02_Hynix_WBI_StitchAI\VisionWorks2_WBI-1000_StitchAI\2. Library\ATI_OpenCV\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)tensorflow\include;C:\Users\jhchoi\Desktop\VisionWorks\VisionWorks2\VisionWorks2_WBI-1000_AI\2. Library\ATI_OpenCV\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)tensorflow\lib;D:\Work\02_Hynix_WBI_StitchAI\VisionWorks2_WBI-1000_StitchAI\2. Library\ATI_OpenCV\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)tensorflow\lib;C:\Users\jhchoi\Desktop\VisionWorks\VisionWorks2\VisionWorks2_WBI-1000_AI\2. Library\ATI_OpenCV\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>tensorflow.lib;opencv_world340d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

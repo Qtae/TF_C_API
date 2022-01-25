@@ -260,6 +260,18 @@ namespace TFTool
 		}
 	}
 
+	std::vector<std::vector<std::vector<float>>> AI::GetClassificationSoftMXResults()
+	{
+		std::vector<std::vector<std::vector<float>>> result;
+		if (mTaskType != 0)
+			return result;
+		else
+		{
+			result = mClassification->GetSoftMXResult();
+			return result;
+		}
+	}
+
 	std::vector<std::vector<float*>> AI::GetSegmentationResults()
 	{
 		std::vector<std::vector<float*>> result;

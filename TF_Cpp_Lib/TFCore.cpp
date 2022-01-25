@@ -528,6 +528,117 @@ bool TFCore::Run(unsigned char** inputImgArr, bool bNormalize)
 	return true;
 }
 
+bool TFCore::Run(std::vector<cv::Mat> inputImgArr, int, bool bNormalize)
+{
+	if (!mIsModelLoaded)
+	{
+		std::cout << "Model Not Loaded!" << std::endl;
+		return false;
+	}
+
+	int imgNum = (int)(sizeof(inputImgArr) / sizeof(float*));  //
+
+	TF_Tensor** inputTensorArr = new TF_Tensor *[mInputOpNum];
+	TF_Tensor** outputTensorArr = new TF_Tensor *[mOutputOpNum];
+
+	if (!(mOutputTensors.empty()))
+	{
+		for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
+		{
+			for (int tensorIdx = 0; tensorIdx < mOutputTensors[opsIdx].size(); ++tensorIdx)
+			{
+				TF_DeleteTensor(mOutputTensors[opsIdx][tensorIdx]);
+			}
+			mOutputTensors[opsIdx].clear();
+		}
+		mOutputTensors.clear();
+	}
+	for (int idxOutputOps = 0; idxOutputOps < mOutputOpNum; ++idxOutputOps)
+	{
+		std::vector<TF_Tensor*> vt;
+		mOutputTensors.push_back(vt);
+	}
+
+	auto const dealloc = [](void*, std::size_t, void*) {};
+
+	for (int opsIdx = 0; opsIdx < inputImgArr.size(); opsIdx++)
+	{
+		cv::Mat tempMatArray = inputImgArr[opsIdx];
+
+		auto const dealloc = [](void*, std::size_t, void*) {};
+
+		float* imgData = new float[imgNum * tempMatArray.rows * tempMatArray.cols * tempMatArray.channels()];
+
+		if (bNormalize)
+		{
+			for (int dataIdx = 0; dataIdx < imgNum; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < tempMatArray.rows * tempMatArray.cols * tempMatArray.channels(); ++pixIdx)
+				{
+					imgData[dataIdx * tempMatArray.rows * tempMatArray.cols * tempMatArray.channels() + pixIdx] = (float)(tempMatArray.at<int>(dataIdx, pixIdx) / (float)(255.));
+				}
+			}
+		}
+		else
+		{
+			for (int dataIdx = 0; dataIdx < imgNum; ++dataIdx)
+			{
+				for (int pixIdx = 0; pixIdx < tempMatArray.rows * tempMatArray.cols * tempMatArray.channels(); ++pixIdx)
+				{
+					imgData[dataIdx * tempMatArray.rows * tempMatArray.cols * tempMatArray.channels() + pixIdx] = (float)(tempMatArray.at<int>(dataIdx, pixIdx));
+				}
+			}
+		}
+		mInputDimsArr[opsIdx][0] = static_cast<long long>(imgNum);
+		mInputDimsArr[opsIdx][1] = static_cast<long long>(tempMatArray.rows);
+		mInputDimsArr[opsIdx][2] = static_cast<long long>(tempMatArray.cols);
+		mInputDimsArr[opsIdx][3] = static_cast<long long>(tempMatArray.channels());
+
+		size_t inputDataSize = mInputDataSizePerBatch[opsIdx] * static_cast<size_t>(imgNum);
+
+		TF_Tensor* inputImgTensor = TF_NewTensor(TF_FLOAT,
+			mInputDimsArr[opsIdx],
+			mInputDims[opsIdx],
+			imgData,
+			inputDataSize,
+			dealloc,
+			nullptr);
+		inputTensorArr[opsIdx] = inputImgTensor;
+
+		delete[] imgData;
+
+	}
+
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)
+	{
+		mOutputDimsArr[opsIdx][0] = static_cast<long long>(imgNum);
+		size_t outputDataSize = mOutputDataSizePerBatch[opsIdx] * static_cast<size_t>(imgNum);
+
+		outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
+	}
+
+	TF_SessionRun(mSession, mRunOptions,
+		mInputOpsArr, inputTensorArr, mInputOpNum,
+		mOutputOpsArr, outputTensorArr, mOutputOpNum,
+		nullptr, 0, nullptr, mStatus);
+
+	//Input Tensor 메모리 해제
+	for (int opsIdx = 0; opsIdx < mInputOpNum; ++opsIdx)
+	{
+		TF_DeleteTensor(inputTensorArr[opsIdx]);
+	}
+
+	if (TF_GetCode(mStatus) != TF_OK)
+	{
+		return false;
+	}
+
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)
+		mOutputTensors[opsIdx].push_back(outputTensorArr[opsIdx]);
+
+	return true;
+}
+
 bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, bool bNormalize, bool bConvertGrayToColor)
 //VisionWorks image input format, has only one input operator
 {

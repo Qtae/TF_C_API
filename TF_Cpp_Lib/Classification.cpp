@@ -151,6 +151,7 @@ std::vector<std::vector<int>> Classification::GetPredCls(float fThresh)
 			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
 				int nMaxIndex = -1;
+
 				float fMaxValue = 0;
 				for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
 				{
@@ -161,6 +162,34 @@ std::vector<std::vector<int>> Classification::GetPredCls(float fThresh)
 					}
 				}
 				resultOp.push_back(nMaxIndex);
+			}
+		}
+		result.push_back(resultOp);
+	}
+	return result;
+}
+
+std::vector<std::vector<std::vector<float>>> Classification::GetSoftMXResult()
+{
+	std::vector<std::vector<std::vector<float>>> result;
+	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)
+	{
+		std::vector<std::vector<float>> resultOp;
+		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)
+		{
+			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
+			int cls = (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			float *output = new float[batch * cls];
+			std::memcpy(output, TF_TensorData(mOutputTensors[opsIdx][i]), batch * cls * sizeof(float));
+
+			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
+			{
+				std::vector<float> SoftMXValue;
+				for (int clsIdx = 0; clsIdx < cls; ++clsIdx)
+				{
+					SoftMXValue.push_back(output[batchIdx * cls + clsIdx]);
+				}
+				resultOp.push_back(SoftMXValue);
 			}
 		}
 		result.push_back(resultOp);
