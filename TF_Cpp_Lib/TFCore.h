@@ -33,9 +33,9 @@ protected:
 	TF_Output* mInputOpsArr;
 	TF_Output* mOutputOpsArr;
 
-	int* mInputDims;
-	int* mOutputDims;
-	long long** mInputDimsArr;
+	int* mInputDims; //ex) mInputDims[0] = 4
+	int* mOutputDims; //ex) mOutputDims[0] = 4 mOutputDims[1] = 2
+	long long** mInputDimsArr; //ex) mInputDimsArr[0][1] =640  mInputDimsArr[1] = [-1, 640, 640, 1]
 	long long** mOutputDimsArr;
 	std::size_t* mInputDataSizePerBatch;
 	std::size_t* mOutputDataSizePerBatch;
@@ -57,7 +57,7 @@ public:
 	bool Run(unsigned char**, bool bNormalize = false);
 	bool Run(unsigned char***, bool bNormalize = false);
 	bool Run(std::vector<std::vector<cv::Mat>>, bool bNormalize = false);
-	bool Run(std::vector<cv::Mat>, bool bNormalize = false);
+	bool Run(std::vector<cv::Mat>, bool bNormalize = false);//
 
 	//VisionWorks image input format, has only one input operator
 	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, bool bNormalize = false, bool bConvertGrayToColor = false);
