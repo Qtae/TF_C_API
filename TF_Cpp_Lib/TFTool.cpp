@@ -295,13 +295,13 @@ namespace TFTool
 		}
 	}
 
-	bool AI::GetWholeImageDetectionResults(DetectionResult* detResArr, int& boxNum, float iouThresh, float scoreThresh)
+	bool AI::GetWholeImageDetectionResults(DetectionResult* detResArr, int& boxNum, int clsNum, float iouThresh, float scoreThresh)
 	{
 		if (mTaskType != 2)
 			return false;
 		else
 		{
-			bool res = mDetection->GetWholeImageDetectionResultsSingleOutput(detResArr, boxNum, iouThresh, scoreThresh);
+			bool res = mDetection->GetWholeImageDetectionResults(detResArr, boxNum, clsNum, iouThresh, scoreThresh);
 			return res;
 		}
 	}
