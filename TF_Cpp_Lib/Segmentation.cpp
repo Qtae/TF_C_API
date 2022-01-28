@@ -24,11 +24,11 @@ bool Segmentation::GetOutput(float*** SegmentationResultArray)
 			int outputSize = (int)TF_Dim(mOutputTensors[opsIdx][i], 1) * (int)TF_Dim(mOutputTensors[opsIdx][i], 2);
 			float *outputImg = new float[batch * outputSize];
 			std::memcpy(outputImg, TF_TensorData(mOutputTensors[opsIdx][i]), batch * outputSize * sizeof(float));
-			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
+			for (int imgIdx = 0; imgIdx < batch; ++imgIdx)
 			{
-				float* batchOutputImg = new float[outputSize];
-				std::memcpy(batchOutputImg, outputImg + batchIdx * outputSize, outputSize * sizeof(float));
-				SegmentationResultArray[opsIdx][outputIter++] = batchOutputImg;
+				float* singleOutputImg = new float[outputSize];
+				std::memcpy(singleOutputImg, outputImg + imgIdx * outputSize, outputSize * sizeof(float));
+				SegmentationResultArray[opsIdx][outputIter++] = singleOutputImg;
 			}
 			delete[] outputImg; 
 		}
@@ -64,8 +64,8 @@ std::vector<std::vector<int*>> Segmentation::GetWholeClsMask()
 			std::memcpy(outputImg, TF_TensorData(mOutputTensors[opsIdx][i]), batch * outputSize * sizeof(float));
 			for (int imgIdx = 0; imgIdx < batch; ++imgIdx)
 			{
-				float* batchOutputImg = new float[outputSize];
-				std::memcpy(batchOutputImg, outputImg + imgIdx * outputSize, outputSize * sizeof(float));
+				float* singleOutputImg = new float[outputSize];
+				std::memcpy(singleOutputImg, outputImg + imgIdx * outputSize, outputSize * sizeof(float));
 			}
 			delete[] outputImg;
 		}
