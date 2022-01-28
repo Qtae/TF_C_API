@@ -10,31 +10,30 @@ Segmentation::~Segmentation()
 {
 }
 
-std::vector<std::vector<float *>> Segmentation::GetOutput()
+bool Segmentation::GetOutput(float*** outputArr)
 {
 	if (!mOutputRes.empty())
 		FreeOutputMap();
 
 	for (int opsIdx = 0; opsIdx < mOutputOpNum; ++opsIdx)//output operator °¹¼ö iteration
 	{
-		std::vector<float*> resultOp;
+		int outputIter = 0;
 		for (int i = 0; i < mOutputTensors[opsIdx].size(); ++i)//Tensor iteration
 		{
 			int batch = (int)TF_Dim(mOutputTensors[opsIdx][i], 0);
-			int outputSize = (int)TF_Dim(mOutputTensors[opsIdx][i], 1) * (int)TF_Dim(mOutputTensors[opsIdx][i], 1);
+			int outputSize = (int)TF_Dim(mOutputTensors[opsIdx][i], 1) * (int)TF_Dim(mOutputTensors[opsIdx][i], 2);
 			float *outputImg = new float[batch * outputSize];
 			std::memcpy(outputImg, TF_TensorData(mOutputTensors[opsIdx][i]), batch * outputSize * sizeof(float));
 			for (int batchIdx = 0; batchIdx < batch; ++batchIdx)
 			{
 				float* batchOutputImg = new float[outputSize];
 				std::memcpy(batchOutputImg, outputImg + batchIdx * outputSize, outputSize * sizeof(float));
-				resultOp.push_back(batchOutputImg);
+				outputArr[opsIdx][outputIter++] = batchOutputImg;
 			}
-			delete[] outputImg;
+			delete[] outputImg; 
 		}
-		mOutputRes.push_back(resultOp);
 	}
-	return mOutputRes;
+	return true;
 }
 
 bool Segmentation::FreeOutputMap()
