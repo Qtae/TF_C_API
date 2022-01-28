@@ -11,7 +11,7 @@ private:
 public:
 	Segmentation();
 	~Segmentation();
-	bool GetOutput(float***);
+	bool GetOutput(float*** SegmentationResultArray);
 	std::vector<std::vector<int*>> GetWholeClsMask();
 	std::vector<std::vector<int*>> GetBinaryMaskWithClsIndex(int);
 	bool GetWholeImageSegmentationResults(unsigned char*, int);

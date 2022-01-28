@@ -10,7 +10,7 @@ Segmentation::~Segmentation()
 {
 }
 
-bool Segmentation::GetOutput(float*** outputArr)
+bool Segmentation::GetOutput(float*** SegmentationResultArray)
 {
 	if (!mOutputRes.empty())
 		FreeOutputMap();
@@ -28,7 +28,7 @@ bool Segmentation::GetOutput(float*** outputArr)
 			{
 				float* batchOutputImg = new float[outputSize];
 				std::memcpy(batchOutputImg, outputImg + batchIdx * outputSize, outputSize * sizeof(float));
-				outputArr[opsIdx][outputIter++] = batchOutputImg;
+				SegmentationResultArray[opsIdx][outputIter++] = batchOutputImg;
 			}
 			delete[] outputImg; 
 		}

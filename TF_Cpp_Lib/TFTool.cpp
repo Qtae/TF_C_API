@@ -272,15 +272,13 @@ namespace TFTool
 		}
 	}
 
-	bool AI::GetSegmentationResults(float*** InputArr)
+	bool AI::GetSegmentationResults(float*** SegmentationResultArray)
 	{
-		bool result= FALSE;
 		if (mTaskType != 1)
-			return result;
+			return false;
 		else
 		{
-			result = mSegmentation->GetOutput(InputArr);
-			return result;
+			mSegmentation->GetOutput(SegmentationResultArray);
 		}
 	}
 
