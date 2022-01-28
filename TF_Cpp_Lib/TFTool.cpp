@@ -272,15 +272,13 @@ namespace TFTool
 		}
 	}
 
-	std::vector<std::vector<float*>> AI::GetSegmentationResults()
+	bool AI::GetSegmentationResults(float*** SegmentationResultArray)
 	{
-		std::vector<std::vector<float*>> result;
 		if (mTaskType != 1)
-			return result;
+			return false;
 		else
 		{
-			result = mSegmentation->GetOutput();
-			return result;
+			mSegmentation->GetOutput(SegmentationResultArray);
 		}
 	}
 
