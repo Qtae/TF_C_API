@@ -14,6 +14,7 @@ namespace TFTool
 		mClassification = new Classification();
 		mSegmentation = new Segmentation();
 		mDetection = new Detection();
+		mVersion = TF_Version();
 	}
 
 	AI::~AI()
@@ -379,5 +380,10 @@ namespace TFTool
 			break;
 		}
 		return dims;
+	}
+
+	const char* AI::GetTFVersion()
+	{
+		return mVersion;
 	}
 }

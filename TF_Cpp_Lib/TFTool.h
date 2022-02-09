@@ -19,6 +19,7 @@ namespace TFTool
 		Classification* mClassification;
 		Segmentation* mSegmentation;
 		Detection* mDetection;
+		const char* mVersion;
 
 	public:
 		//Constructor of AI Instance.
@@ -162,5 +163,8 @@ namespace TFTool
 		//Returns input/output dimensions
 		__declspec(dllexport) long long** GetInputDims();
 		__declspec(dllexport) long long** GetOutputDims();
+
+		//Returns Tensorflow Version
+		__declspec(dllexport) const char* GetTFVersion();
 	};
 }
