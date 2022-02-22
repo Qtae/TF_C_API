@@ -20,6 +20,7 @@ protected:
 
 	bool mIsModelLoaded;
 	bool mIsDataLoaded;
+	bool mbRun;
 
 	TF_Session* mSession;
 	TF_Buffer* mRunOptions;
@@ -41,6 +42,8 @@ protected:
 	std::size_t* mOutputDataSizePerBatch;
 
 	std::vector<std::vector<TF_Tensor*>> mOutputTensors;
+	std::vector<const char*> mInputOpNames;
+	std::vector<const char*> mOutputOpNames;
 
 	CPoint mImageSize;
 	CPoint mCropSize;
@@ -51,6 +54,7 @@ public:
 	~TFCore();
 
 	bool LoadModel(const char*, std::vector<const char*>&, std::vector<const char*>&);
+	bool ReloadModel();
 
 	bool Run(float**, bool bNormalize = false);
 	bool Run(float***, bool bNormalize = false);
@@ -60,7 +64,7 @@ public:
 	bool Run(std::vector<cv::Mat>, bool bNormalize = false);//
 
 	//VisionWorks image input format, has only one input operator
-	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, bool bNormalize = false, bool bConvertGrayToColor = false);
+	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, bool bNormalize = false, bool bConvertGrayToColor = false, bool bReloadEveryRun = false);
 
 	bool Run(float***, int, bool bNormalize = false);
 	bool Run(float**, int, bool bNormalize = false);
@@ -70,7 +74,7 @@ public:
 	bool Run(std::vector<cv::Mat>, int, bool bNormalize = false);
 
 	//VisionWorks image input format, has only one input operator
-	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, int, bool bNormalize = false, bool bConvertGrayToColor = false);
+	bool Run(unsigned char**, CPoint, CPoint, CPoint, CPoint, int, bool bNormalize = false, bool bConvertGrayToColor = false, bool bReloadEveryRun = false);
 	//bool Run(unsigned char**, CPoint, CPoint, int, bool bNormalize = false);
 
 	bool FreeModel();

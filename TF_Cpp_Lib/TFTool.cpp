@@ -113,19 +113,19 @@ namespace TFTool
 		return res;
 	}
 
-	bool AI::Run(unsigned char** inputImg, int imgSizeX, int imgSizeY, int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY, bool bNormalize, bool bConvertGrayToColor)
+	bool AI::Run(unsigned char** inputImg, int imgSizeX, int imgSizeY, int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY, bool bNormalize, bool bConvertGrayToColor, bool bReloadEveryRun)
 	{
 		bool res = false;
 		switch (mTaskType)
 		{
 		case 0://classification
-			res = mClassification->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor);
+			res = mClassification->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor, bReloadEveryRun);
 			break;
 		case 1://segmentation
-			res = mSegmentation->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor);
+			res = mSegmentation->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor, bReloadEveryRun);
 			break;
 		case 2://detection
-			res = mDetection->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor);
+			res = mDetection->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), bNormalize, bConvertGrayToColor, bReloadEveryRun);
 			break;
 		}
 		return res;
@@ -203,19 +203,19 @@ namespace TFTool
 		return res;
 	}
 
-	bool AI::Run(unsigned char** inputImg, int imgSizeX, int imgSizeY, int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY, int batch, bool bNormalize, bool bConvertGrayToColor)
+	bool AI::Run(unsigned char** inputImg, int imgSizeX, int imgSizeY, int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY, int batch, bool bNormalize, bool bConvertGrayToColor, bool bReloadEveryRun)
 	{
 		bool res = false;
 		switch (mTaskType)
 		{
 		case 0://classification
-			res = mClassification->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor);
+			res = mClassification->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor, bReloadEveryRun);
 			break;
 		case 1://segmentation
-			res = mSegmentation->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor);
+			res = mSegmentation->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor, bReloadEveryRun);
 			break;
 		case 2://detection
-			res = mDetection->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor);
+			res = mDetection->Run(inputImg, CPoint(imgSizeX, imgSizeY), CPoint(cropSizeX, cropSizeY), CPoint(overlapSizeX, overlapSizeY), CPoint(buffPosX, buffPosY), batch, bNormalize, bConvertGrayToColor, bReloadEveryRun);
 			break;
 		}
 		return res;

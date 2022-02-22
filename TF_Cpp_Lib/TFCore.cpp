@@ -21,6 +21,7 @@ TFCore::TFCore()
 
 	mIsModelLoaded = false;
 	mIsDataLoaded = false;
+	mbRun = false;
 }
 
 TFCore::~TFCore()
@@ -70,6 +71,9 @@ bool TFCore::LoadModel(const char* modelPath, std::vector<const char*> &inputOpN
 	mInputOpNum = (int)inputOpNames.size();
 	mOutputOpNum = (int)outputOpNames.size();
 
+	mInputOpNames = inputOpNames;
+	mOutputOpNames = outputOpNames;
+
 	if (TF_GetCode(mStatus) != TF_OK)
 	{
 		std::cout << "mStatus : " << TF_Message(mStatus) << std::endl;
@@ -88,7 +92,7 @@ bool TFCore::LoadModel(const char* modelPath, std::vector<const char*> &inputOpN
 	for (int i = 0; i < mInputOpNum; ++i)
 	{
 		char inputOpFullName[200];
-		strcpy_s(inputOpFullName, sizeof(inputOpFullName), (char*)inputOpNames[i]);
+		strcpy_s(inputOpFullName, sizeof(inputOpFullName), (char*)mInputOpNames[i]);
 		char* chIndex = NULL;
 		const char* inputOpName = strtok_s(inputOpFullName, ":", &chIndex);
 		int inputOpIdx = atoi(chIndex);
@@ -113,7 +117,7 @@ bool TFCore::LoadModel(const char* modelPath, std::vector<const char*> &inputOpN
 	for (int i = 0; i < mOutputOpNum; ++i)
 	{
 		char outputOpFullName[200];
-		strcpy_s(outputOpFullName, sizeof(outputOpFullName), (char*)outputOpNames[i]);
+		strcpy_s(outputOpFullName, sizeof(outputOpFullName), (char*)mOutputOpNames[i]);
 		char* chIndex = NULL;
 		const char* outputOpName = strtok_s(outputOpFullName, ":", &chIndex);
 		int outputOpIdx = atoi(chIndex);
@@ -135,6 +139,37 @@ bool TFCore::LoadModel(const char* modelPath, std::vector<const char*> &inputOpN
 		delete[] outputShape;
 	}
 	mIsModelLoaded = true;
+	return true;
+}
+
+bool TFCore::ReloadModel()
+{
+	TF_DeleteGraph(mGraph);
+	if (mSessionOptions != nullptr) TF_DeleteSessionOptions(mSessionOptions);
+	if (mMetaGraph != nullptr) TF_DeleteBuffer(mMetaGraph);
+	if (mGraph != nullptr) TF_DeleteGraph(mGraph);
+	if (mSession != nullptr)
+	{
+		TF_CloseSession(mSession, mStatus);
+		TF_DeleteSession(mSession, mStatus);
+	}
+	if (mStatus != nullptr) TF_DeleteStatus(mStatus);
+
+	mSessionOptions = TF_NewSessionOptions();
+	mGraph = TF_NewGraph();
+	mMetaGraph = TF_NewBuffer();
+	mStatus = TF_NewStatus();
+	mSession = TF_NewSession(mGraph, mSessionOptions, mStatus);
+
+	const char* TAG = "serve";
+	mSession = TF_LoadSessionFromSavedModel(mSessionOptions, mRunOptions, mModelPath, &TAG, 1, mGraph, mMetaGraph, mStatus);
+
+	if (TF_GetCode(mStatus) != TF_OK)
+	{
+		std::cout << "mStatus : " << TF_Message(mStatus) << std::endl;
+		return false;
+	}
+
 	return true;
 }
 
@@ -663,7 +698,7 @@ bool TFCore::Run(std::vector<cv::Mat> inputImgArr, int, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, bool bNormalize, bool bConvertGrayToColor)
+bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, bool bNormalize, bool bConvertGrayToColor, bool bReloadEveryRun)
 //VisionWorks image input format, has only one input operator
 {
 	if (!mIsModelLoaded)
@@ -761,10 +796,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 				outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 			}
 
+			if (bReloadEveryRun && mbRun) ReloadModel();
 			TF_SessionRun(mSession, mRunOptions,
 				mInputOpsArr, inputTensorArr, mInputOpNum,
 				mOutputOpsArr, outputTensorArr, mOutputOpNum,
 				nullptr, 0, nullptr, mStatus);
+			mbRun = true;
 
 			if (TF_GetCode(mStatus) != TF_OK)
 			{
@@ -824,10 +861,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 				outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 			}
 
+			if (bReloadEveryRun && mbRun) ReloadModel();
 			TF_SessionRun(mSession, mRunOptions,
 				mInputOpsArr, inputTensorArr, mInputOpNum,
 				mOutputOpsArr, outputTensorArr, mOutputOpNum,
 				nullptr, 0, nullptr, mStatus);
+			mbRun = true;
 
 			if (TF_GetCode(mStatus) != TF_OK)
 			{
@@ -898,10 +937,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 				outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 			}
 
+			if (bReloadEveryRun && mbRun) ReloadModel();
 			TF_SessionRun(mSession, mRunOptions,
 				mInputOpsArr, inputTensorArr, mInputOpNum,
 				mOutputOpsArr, outputTensorArr, mOutputOpNum,
 				nullptr, 0, nullptr, mStatus);
+			mbRun = true;
 
 			if (TF_GetCode(mStatus) != TF_OK)
 			{
@@ -961,10 +1002,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 				outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 			}
 
+			if (bReloadEveryRun && mbRun) ReloadModel();
 			TF_SessionRun(mSession, mRunOptions,
 				mInputOpsArr, inputTensorArr, mInputOpNum,
 				mOutputOpsArr, outputTensorArr, mOutputOpNum,
 				nullptr, 0, nullptr, mStatus);
+			mbRun = true;
 
 			if (TF_GetCode(mStatus) != TF_OK)
 			{
@@ -1430,7 +1473,7 @@ bool TFCore::Run(unsigned char** inputImgArr, int batch, bool bNormalize)
 	return true;
 }
 
-bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, int batch, bool bNormalize, bool bConvertGrayToColor)
+bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoint overlapSize, CPoint buffPos, int batch, bool bNormalize, bool bConvertGrayToColor, bool bReloadEveryRun)
 //VisionWorks image input format, has only one input operator
 {
 	if (!mIsModelLoaded)
@@ -1535,10 +1578,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 					outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 				}
 
+				if (bReloadEveryRun && mbRun) ReloadModel();
 				TF_SessionRun(mSession, mRunOptions,
 					mInputOpsArr, inputTensorArr, mInputOpNum,
 					mOutputOpsArr, outputTensorArr, mOutputOpNum,
 					nullptr, 0, nullptr, mStatus);
+				mbRun = true;
 
 				if (TF_GetCode(mStatus) != TF_OK)
 				{
@@ -1605,10 +1650,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 					outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 				}
 
+				if (bReloadEveryRun && mbRun) ReloadModel();
 				TF_SessionRun(mSession, mRunOptions,
 					mInputOpsArr, inputTensorArr, mInputOpNum,
 					mOutputOpsArr, outputTensorArr, mOutputOpNum,
 					nullptr, 0, nullptr, mStatus);
+				mbRun = true;
 
 				if (TF_GetCode(mStatus) != TF_OK)
 				{
@@ -1678,10 +1725,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 					outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 				}
 
+				if (bReloadEveryRun && mbRun) ReloadModel();
 				TF_SessionRun(mSession, mRunOptions,
 					mInputOpsArr, inputTensorArr, mInputOpNum,
 					mOutputOpsArr, outputTensorArr, mOutputOpNum,
 					nullptr, 0, nullptr, mStatus);
+				mbRun = true;
 
 				if (TF_GetCode(mStatus) != TF_OK)
 				{
@@ -1748,10 +1797,12 @@ bool TFCore::Run(unsigned char** inputImg, CPoint imgSize, CPoint cropSize, CPoi
 					outputTensorArr[opsIdx] = TF_AllocateTensor(TF_FLOAT, mOutputDimsArr[opsIdx], mOutputDims[opsIdx], outputDataSize);
 				}
 
+				if (bReloadEveryRun && mbRun) ReloadModel();
 				TF_SessionRun(mSession, mRunOptions,
 					mInputOpsArr, inputTensorArr, mInputOpNum,
 					mOutputOpsArr, outputTensorArr, mOutputOpNum,
 					nullptr, 0, nullptr, mStatus);
+				mbRun = true;
 
 				if (TF_GetCode(mStatus) != TF_OK)
 				{

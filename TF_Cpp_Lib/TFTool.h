@@ -80,9 +80,10 @@ namespace TFTool
 		//  buffPosX, buffPosY : Buffer position of image origin.
 		//	bNormalize : Divide pixel value by 255 when true.
 		//	bConvertGrayToColor : Convert Grayscale input image to color image.
+		//  bReloadEveryRun : Reload Model for Every Run.
 		__declspec(dllexport) bool Run(unsigned char** inputImg, int imgSizeX, int imgSizeY,
 			int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY,
-			bool bNormalize = false, bool bConvertGrayToColor = false);
+			bool bNormalize = false, bool bConvertGrayToColor = false, bool bReloadEveryRun = false);
 
 		//Run Session
 		//	inputImgArr[i][j][k] : Array of input image(Float)
@@ -127,9 +128,10 @@ namespace TFTool
 		//	batch : Image batch size
 		//	bNormalize : Divide pixel value by 255 when true.
 		//	bConvertGrayToColor : Convert Grayscale input image to color image.
+		//  bReloadEveryRun : Reload Model for Every Run.
 		__declspec(dllexport) bool Run(unsigned char** inputImg, int imgSizeX, int imgSizeY,
 			int cropSizeX, int cropSizeY, int overlapSizeX, int overlapSizeY, int buffPosX, int buffPosY,
-			int batch, bool bNormalize = false, bool bConvertGrayToColor = false);
+			int batch, bool bNormalize = false, bool bConvertGrayToColor = false, bool bReloadEveryRun = false);
 
 		//Free memory
 		__declspec(dllexport) bool FreeModel();
